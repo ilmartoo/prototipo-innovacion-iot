@@ -1,6 +1,6 @@
-import Layout from "@/layout";
-import Home from "@/pages/Home";
+import Layout from "@/Layout";
 import ActivityLiveData from "@/pages/ActivityLiveData";
+import Home from "@/pages/Home";
 import { Route, Routes } from "react-router";
 
 export default function App() {
@@ -8,7 +8,13 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
-        <Route path="activity-live-data" element={<ActivityLiveData />} />
+        <Route path="/activity/:activity">
+          <Route path="/live" element={<ActivityLiveData />} />
+          {/* <Route path="/review" element={<ActivityReviewData />} /> */}
+        </Route>
+        {/* <Route path="/activities" element={<Activities />}/> */}
+        {/* <Route path="/profile" element={<Profile />}/> */}
+        {/* <Route path="/achievements" element={<Achievements />}/> */}
       </Route>
     </Routes>
   );
