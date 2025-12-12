@@ -1,0 +1,213 @@
+import alba from "@/assets/alba.webp";
+import barbara from "@/assets/barbara.webp";
+import juan from "@/assets/juan.webp";
+import paulina from "@/assets/paulina.png";
+import samuel from "@/assets/samuel.webp";
+import type { Activity } from "@/models/activity";
+import type { User } from "@/models/user";
+
+const dateNow = new Date();
+
+function createDate(from: {
+  set?: { year?: number; month?: number; day?: number; hour?: number; minutes?: number };
+  offset?: { years?: number; months?: number; days?: number; hours?: number; minutes?: number };
+}): Date {
+  let date = new Date(dateNow);
+  const { set, offset } = from;
+
+  if (set?.year != null) {
+    date.setFullYear(set.year);
+  }
+  if (set?.month != null) {
+    date.setMonth(set.month - 1);
+  }
+  if (set?.day != null) {
+    date.setDate(set.day);
+  }
+  if (set?.hour != null) {
+    date.setHours(set.hour);
+  }
+  if (set?.minutes != null) {
+    date.setMinutes(set.minutes);
+  }
+
+  if (offset?.years != null) {
+    date.setFullYear(date.getFullYear() + offset.years);
+  }
+  if (offset?.months != null) {
+    date.setMonth(date.getMonth() + offset.months);
+  }
+  if (offset?.days != null) {
+    date.setDate(date.getDate() + offset.days);
+  }
+  if (offset?.hours != null) {
+    date.setHours(date.getHours() + offset.hours);
+  }
+  if (offset?.minutes != null) {
+    date.setMinutes(date.getMinutes() + offset.minutes);
+  }
+
+  return date;
+}
+
+export const users: User[] = [
+  {
+    id: "0000",
+    name: "Paulina",
+    surname: "Rodríguez Fariña",
+    picture: paulina,
+    level: 37,
+    completedActivities: 14,
+  },
+  {
+    id: "0001",
+    name: "Juan",
+    surname: "Garrido Cerezo",
+    picture: juan,
+    level: 28,
+    completedActivities: 21,
+  },
+  {
+    id: "0002",
+    name: "Bárbara",
+    surname: "Herrera Guerra",
+    picture: barbara,
+    level: 14,
+    completedActivities: 9,
+  },
+  {
+    id: "0003",
+    name: "Alba",
+    surname: "Quevedo Fernández",
+    picture: alba,
+    level: 45,
+    completedActivities: 20,
+  },
+  {
+    id: "0004",
+    name: "Samuel",
+    surname: "Laredo González",
+    picture: samuel,
+    level: 24,
+    completedActivities: 2,
+  },
+];
+
+export function getUserById(userId: string): User {
+  return users.find((u) => u.id === userId)!;
+}
+
+export const currentUser = users[0];
+
+export const activities: Activity[] = [
+  {
+    id: "0000",
+    ownerId: "0000",
+    title: "Balonmano y puntería",
+    description:
+      "Práctica de puntería en el Pabellón Municipal de Pontevedra. Necesario conocimientos mínimos de balonmano. Luego quizás podamos jugar una pachanga.",
+    date: createDate({ offset: { minutes: -30 } }),
+    participants: 6,
+    maxParticipants: 10,
+    finished: false,
+  },
+  {
+    id: "0001",
+    ownerId: "0001",
+    title: "Un 21 con amigos",
+    description:
+      "Vamos a jugar un 21 y necesitamos a personas que les apetezca echarse unas partidas antes de un partido.",
+    date: createDate({ offset: { hours: 2 }, set: { minutes: 30 } }),
+    participants: 7,
+    maxParticipants: 12,
+    finished: false,
+  },
+  {
+    id: "0002",
+    ownerId: "0002",
+    title: "Pachanga de baloncesto",
+    description:
+      "Pachanga de baloncesto en Parque Cataluña. Necesitamos a gente con un poco de nivel para poder practicar.",
+    date: createDate({ offset: { days: 1 }, set: { hour: 17, minutes: 30 } }),
+    participants: 11,
+    maxParticipants: 14,
+    finished: false,
+  },
+  {
+    id: "0003",
+    ownerId: "0003",
+    title: "Partido de bádminton 2v2",
+    description: "Buscamos pareja de bádminton para practicar de cara a un torneo amateur.",
+    date: createDate({ offset: { days: 1 }, set: { hour: 19, minutes: 0 } }),
+    participants: 2,
+    maxParticipants: 4,
+    finished: false,
+  },
+  {
+    id: "0004",
+    ownerId: "0004",
+    title: "Baloncesto. ¿Alguien?",
+    description:
+      "Vamos a jugar un partido amistoso contra el grupo de IES Garrido. Necesitamos algunos miembros para suplir vacantes.",
+    date: createDate({ offset: { days: 1 }, set: { hour: 21, minutes: 45 } }),
+    participants: 5,
+    maxParticipants: 8,
+    finished: false,
+  },
+  {
+    id: "0005",
+    ownerId: "0003",
+    title: "Balonmano y dianas",
+    description: "Práctica de puntería en el Pabellón Municipal de Cangas.",
+    date: createDate({ set: { month: 9, day: 9, hour: 18, minutes: 45 } }),
+    participants: 6,
+    maxParticipants: 10,
+    finished: true,
+  },
+  {
+    id: "0006",
+    ownerId: "0001",
+    title: "Vamos a jugar un Reloj",
+    description: "Algunas rondas de un divertido Reloj antes de jugar un partido entre amigos.",
+    date: createDate({ set: { month: 9, day: 10, hour: 18, minutes: 0 } }),
+    participants: 12,
+    maxParticipants: 16,
+    finished: true,
+  },
+  {
+    id: "0007",
+    ownerId: "0000",
+    title: "Pachanga de balonmano",
+    description:
+      "Pachanga entre amigos. Buscamos gente que sepa de balonmano para poder realizar cambios y probar cosas nuevas.",
+    date: createDate({ set: { month: 9, day: 10, hour: 20, minutes: 30 } }),
+    participants: 15,
+    maxParticipants: 20,
+    finished: true,
+  },
+];
+
+export const activityParticipants: Record<Activity["id"], User["id"][]> = {
+  "0000": ["0000"],
+  "0001": ["0000", "0001"],
+  "0002": ["0002"],
+  "0003": ["0003"],
+  "0004": ["0004"],
+  "0005": ["0000", "0003"],
+  "0006": ["0000", "0001"],
+  "0007": ["0000"],
+};
+
+export function isUserInActivity(userId: string, activityId: string): boolean {
+  return activityParticipants[activityId].includes(userId);
+}
+
+export function addUserToActivity(userId: string, activityId: string): void {
+  if (!isUserInActivity(userId, activityId)) {
+    activityParticipants[activityId].push(userId);
+  }
+}
+
+export function removeUserFromActivity(userId: string, activityId: string): void {
+  activityParticipants[activityId] = activityParticipants[activityId].filter((id) => id !== userId);
+}

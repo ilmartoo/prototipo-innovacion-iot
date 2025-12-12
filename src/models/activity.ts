@@ -2,7 +2,7 @@ export interface Activity {
   id: string;
   ownerId: string;
   title: string;
-  description: number;
+  description: string;
   date: Date;
   participants: number;
   maxParticipants: number;

@@ -1,6 +1,7 @@
 export interface User {
   id: string;
   name: string;
+  surname: string;
   picture: string;
   level: number;
   completedActivities: number;
