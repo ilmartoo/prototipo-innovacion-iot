@@ -17,22 +17,22 @@ export default function Layout() {
 
   return (
     <div className="max-w-110 m-auto">
-      <header className="py-4 border-b  flex justify-between">
+      <header className="py-4 border-b">
         <NavigationMenu viewport={isMobile}>
-          <NavigationMenuList>
-            <NavItem to="/">
-              <House className="text-foreground size-6" />
-            </NavItem>
-            <NavItem to="/mis-actividades">Mis actividades</NavItem>
-            <NavItem to="/rankings">Rankings</NavItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-        <NavigationMenu viewport={isMobile}>
-          <NavigationMenuList>
-            <NavItem to="/mi-prefil">
-              <ImagenPerfil src={paulina} nombre="Paulina R." nivel={37} />
-            </NavItem>
-          </NavigationMenuList>
+          <div className="flex justify-between">
+            <NavigationMenuList>
+              <NavItem to="/">
+                <House className="text-foreground size-6" />
+              </NavItem>
+              <NavItem to="/activities">Mis actividades</NavItem>
+              <NavItem to="/rankings">Rankings</NavItem>
+            </NavigationMenuList>
+            <NavigationMenuList>
+              <NavItem to="/profile">
+                <ImagenPerfil src={paulina} nombre="Paulina R." nivel={37} />
+              </NavItem>
+            </NavigationMenuList>
+          </div>
         </NavigationMenu>
       </header>
       <main>
@@ -70,7 +70,7 @@ interface NavItemProps {
 function NavItem(props: NavItemProps) {
   return (
     <NavigationMenuItem>
-      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+      <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
         <Link to={props.to}>{props.children}</Link>
       </NavigationMenuLink>
     </NavigationMenuItem>

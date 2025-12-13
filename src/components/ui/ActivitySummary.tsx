@@ -1,23 +1,24 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card";
+import { CardContent, CardDescription, CardFooter } from "@/components/ui/card";
+import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
 import { getActivityTime, type Activity } from "@/models/activity";
 import { Clipboard, Clock4, Users } from "lucide-react";
 
 interface ActivitySummaryProps {
   activity: Activity;
   userPicture: string;
-  onIconClick: () => void;
+  onIconClick?: () => void;
 }
 
 export default function ActivitySummary(props: ActivitySummaryProps) {
   return (
-    <Card className="flex">
-      <div>
+    <Item className="flex">
+      <ItemContent>
         <CardContent className="grid grid-cols-[auto_1fr]">
-          <CardTitle>{props.activity.title}</CardTitle>
+          <ItemTitle>{props.activity.title}</ItemTitle>
           <div>
-            <Clock4 /> {getActivityTime(props.activity.date)}
+            <Clock4 strokeWidth="1" /> {getActivityTime(props.activity.date)}
           </div>
           <div>
             <Avatar>
@@ -25,19 +26,19 @@ export default function ActivitySummary(props: ActivitySummaryProps) {
             </Avatar>
           </div>
           <div className="text-muted-foreground">
-            <Users />
+            <Users strokeWidth="1" />
             {props.activity.participants}/{props.activity.maxParticipants}
           </div>
         </CardContent>
         <CardFooter>
           <CardDescription>{props.activity.description}</CardDescription>
         </CardFooter>
-      </div>
-      <div>
-        <Button variant="ghost" onClick={props.onIconClick}>
-          <Clipboard />
-        </Button>
-      </div>
-    </Card>
+        <div>
+          <Button variant="ghost" onClick={props.onIconClick}>
+            <Clipboard />
+          </Button>
+        </div>
+      </ItemContent>
+    </Item>
   );
 }

@@ -8,13 +8,13 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
-        <Route path="/activity/:activity">
-          <Route path="/live" element={<ActivityLiveData />} />
+        <Route path="activity/:activity">
+          <Route path="live" element={<ActivityLiveData />} />
           {/* <Route path="/review" element={<ActivityReviewData />} /> */}
         </Route>
         {/* <Route path="/activities" element={<Activities />}/> */}
         {/* <Route path="/profile" element={<Profile />}/> */}
-        {/* <Route path="/achievements" element={<Achievements />}/> */}
+        {/* <Route path="/rakings" element={<Rankings />}/> */}
       </Route>
     </Routes>
   );
