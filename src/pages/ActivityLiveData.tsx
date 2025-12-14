@@ -17,7 +17,6 @@ import { Clock, ChevronDown } from "lucide-react";
 export default function ActivityData() {
   const [selectedPlayer, setSelectedPlayer] = useState("global");
 
-  // Usar datos reales del ranking
   const playersData = activityRankings.map(ranking => ({
     id: ranking.position,
     name: ranking.name.split(' ').slice(0, 2).map((n, i) => i === 0 ? n : n[0] + '.').join(' '),
@@ -26,6 +25,120 @@ export default function ActivityData() {
     avatar: ranking.picture,
     userId: ranking.userId
   }));
+
+  const selectedPlayerData = selectedPlayer !== "global" 
+    ? playersData.find(p => p.userId === selectedPlayer)
+    : null;
+
+  const renderPlayerView = () => {
+    if (!selectedPlayerData) return null;
+    
+    return (
+      <div>
+        {/* Card - Posicions en directo */}
+        <div className="flex justify-center mb-6">
+          <svg
+            width="300"
+            height="200"
+            viewBox="0 0 300 200"
+            className="border border-gray-200 rounded-lg shadow-sm"
+          >
+            {/* Court background */}
+            <rect width="300" height="200" fill="#FF8C00" />
+            
+            {/* Green border */}
+            <rect x="0" y="0" width="300" height="200" fill="none" stroke="#4CAF50" strokeWidth="8" />
+            
+            {/* Center line */}
+            <line x1="150" y1="0" x2="150" y2="200" stroke="white" strokeWidth="2" strokeDasharray="4,4" />
+            
+            {/* Center circle */}
+            <circle cx="150" cy="100" r="30" fill="none" stroke="white" strokeWidth="2" strokeDasharray="4,4" />
+            <circle cx="150" cy="100" r="8" fill="#FFD700" />
+            
+            {/* Left court area */}
+            <path
+              d="M 0 50 Q 60 50 60 100 Q 60 150 0 150"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="4,4"
+            />
+            
+            {/* Right court area */}
+            <path
+              d="M 300 50 Q 240 50 240 100 Q 240 150 300 150"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="4,4"
+            />
+            
+            {/* Left basket area */}
+            <rect x="0" y="80" width="20" height="40" fill="#4CAF50" />
+            
+            {/* Right basket area */}
+            <rect x="280" y="80" width="20" height="40" fill="#4CAF50" />
+
+            {/* Red team */}
+            <circle cx="100" cy="120" r="6" fill="#FF4444" stroke="white" strokeWidth="1" />
+            
+            {/* Blue team */}
+            <circle cx="220" cy="80" r="6" fill="#4488FF" stroke="white" strokeWidth="1" />
+          </svg>
+        </div>
+
+        {/* Estadísticas do xogador */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <StatCard
+            value="23 s"
+            label="TIEMPO TURNO"
+            progress={75}
+            progressColor="red"
+          />
+          <StatCard
+            value="2"
+            label="TURNOS EN POSICIÓN ACTUAL"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <StatCard
+            value="60%"
+            label="LANZAMIENTOS EXITOSOS"
+            progress={60}
+            progressColor="blue"
+          />
+          <StatCard
+            value="2"
+            label="TIROS FUERA"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <StatCard
+            value={`${selectedPlayerData.goals}`}
+            label="GOLES"
+          />
+          <StatCard
+            value="2"
+            label="RACHA DE GOLES"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <StatCard
+            value="3,44 m"
+            label="DISTANCIA MEDIA DE TIRO"
+          />
+          <StatCard
+            value="5,13 m"
+            label="DISTANCIA ACTUAL"
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -54,6 +167,9 @@ export default function ActivityData() {
         </DropdownMenu>
       </TopBar>
 
+      {/* Renderizado condicional */}
+      {selectedPlayer === "global" ? (
+        <>
       {/* Card - Posicions en directo */}
       {/* Esto mo fixo chatgpt a partir da imagen, interesante */}
       <div className="flex justify-center mb-6">
@@ -151,19 +267,17 @@ export default function ActivityData() {
         />
       </div>
 
-      {/* Ranking de jugadores */}
+      {/* Ranking de xogadores */}
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-3">Ranking</h2>
         <Card>
           <CardContent className="p-0">
-            {/* Encabezados */}
             <div className="flex items-center justify-between px-4 pb-3 text-sm font-medium text-muted-foreground border-b">
               <div className="w-12">Goles</div>
               <div className="flex-1">Jugador</div>
               <div>Posición</div>
             </div>
           
-          {/* Filas de datos */}
           {playersData.map((player, index) => (
             <div key={player.id}>
               <div className="flex items-center justify-between px-4 py-3">
@@ -183,6 +297,10 @@ export default function ActivityData() {
           </CardContent>
         </Card>
       </div>
+        </>
+      ) : (
+        renderPlayerView()
+      )}
     </div>
   );
 }
