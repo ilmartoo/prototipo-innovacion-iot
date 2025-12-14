@@ -1,44 +1,101 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardDescription, CardFooter } from "@/components/ui/card";
-import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
+import { activityParticipants, currentUser, getUserById, isUserInActivity } from "@/data/app-data";
 import { getActivityTime, type Activity } from "@/data/models/activity";
-import { Clipboard, Clock4, Users } from "lucide-react";
+import {
+  ClipboardCheckIcon,
+  ClipboardPasteIcon,
+  ClipboardPenIcon,
+  Clock4Icon,
+  ClockAlertIcon,
+  Users,
+} from "lucide-react";
+import type { ReactNode } from "react";
 
 interface ActivitySummaryProps {
   activity: Activity;
-  userPicture: string;
+  isListing?: boolean;
   onIconClick?: () => void;
 }
 
 export default function ActivitySummary(props: ActivitySummaryProps) {
+  const owner = getUserById(props.activity.ownerId);
+
+  function icon() {
+    let variant: "default" | "outline";
+    let icon: ReactNode;
+
+    if (props.isListing) {
+      if (isUserInActivity(currentUser.id, props.activity.id)) {
+        variant = "outline";
+        icon = <ClipboardCheckIcon className="size-5" />;
+      } else {
+        variant = "default";
+        icon = <ClipboardPenIcon className="size-5" />;
+      }
+    } else {
+      variant = "default";
+      icon = <ClipboardPasteIcon className="size-5" />;
+    }
+
+    return (
+      <Button
+        size="icon"
+        variant={variant}
+        className="rounded-full cursor-pointer"
+        onClick={props.onIconClick}
+      >
+        {icon}
+      </Button>
+    );
+  }
+
   return (
-    <Item className="flex">
+    <Item className="flex p-0">
       <ItemContent>
-        <CardContent className="grid grid-cols-[auto_1fr]">
-          <ItemTitle>{props.activity.title}</ItemTitle>
-          <div>
-            <Clock4 strokeWidth="1" /> {getActivityTime(props.activity.date)}
+        <ActivityDataRow>
+          <ItemTitle className="line-clamp-1 text-base">{props.activity.title}</ItemTitle>
+          <div className="flex items-center gap-0.5">
+            {props.activity.started ? (
+              <>
+                <ClockAlertIcon strokeWidth="1" className="size-5" />{" "}
+                <span className="font-semibold">En directo</span>
+              </>
+            ) : (
+              <>
+                <Clock4Icon strokeWidth="1" className="size-5" />{" "}
+                <span>{getActivityTime(props.activity.date)}</span>
+              </>
+            )}
           </div>
-          <div>
-            <Avatar>
-              <AvatarImage src={props.userPicture} alt="Activity owner picture" />
+        </ActivityDataRow>
+        <ActivityDataRow>
+          <div className="flex items-center gap-2">
+            <Avatar className="size-6">
+              <AvatarImage src={owner.picture} alt="Activity owner picture" />
             </Avatar>
+            <span className="line-clamp-1">
+              {owner.name} {owner.surname}
+            </span>
           </div>
-          <div className="text-muted-foreground">
-            <Users strokeWidth="1" />
-            {props.activity.participants}/{props.activity.maxParticipants}
+          <div className="text-muted-foreground flex items-center gap-0.5">
+            <Users strokeWidth="1" className="size-5" />
+            {activityParticipants[props.activity.id].length}/{props.activity.maxParticipants}
           </div>
-        </CardContent>
-        <CardFooter>
-          <CardDescription>{props.activity.description}</CardDescription>
-        </CardFooter>
-        <div>
-          <Button variant="ghost" onClick={props.onIconClick}>
-            <Clipboard />
-          </Button>
-        </div>
+        </ActivityDataRow>
+        <ItemDescription>{props.activity.description}</ItemDescription>
       </ItemContent>
+
+      <ItemActions>{icon()}</ItemActions>
     </Item>
   );
+}
+
+interface ActivityDataRowProps {
+  children: ReactNode;
+}
+
+function ActivityDataRow(props: ActivityDataRowProps) {
+  return <div className="flex justify-between">{props.children}</div>;
 }

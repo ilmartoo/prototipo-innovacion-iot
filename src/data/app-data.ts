@@ -52,6 +52,10 @@ function createDate(from: {
   return date;
 }
 
+function generateTemporalUserIds(size: number): string[] {
+  return new Array(size).map((_, i) => "T" + i.toString().padStart(3, "0"));
+}
+
 export const users: User[] = [
   {
     id: "0000",
@@ -108,8 +112,8 @@ export const activities: Activity[] = [
     title: "Balonmano y puntería",
     description: "Práctica de puntería en el Pabellón Municipal de Pontevedra. Necesario conocimientos mínimos de balonmano. Luego quizás podamos jugar una pachanga.",
     date: createDate({ offset: { minutes: -30 } }),
-    participants: 6,
     maxParticipants: 10,
+    started: true,
     finished: false,
   },
   {
@@ -118,8 +122,8 @@ export const activities: Activity[] = [
     title: "Un 21 con amigos",
     description: "Vamos a jugar un 21 y necesitamos a personas que les apetezca echarse unas partidas antes de un partido.",
     date: createDate({ offset: { hours: 2 }, set: { minutes: 30 } }),
-    participants: 7,
     maxParticipants: 12,
+    started: false,
     finished: false,
   },
   {
@@ -128,8 +132,8 @@ export const activities: Activity[] = [
     title: "Pachanga de baloncesto",
     description: "Pachanga de baloncesto en Parque Cataluña. Necesitamos a gente con un poco de nivel para poder practicar.",
     date: createDate({ offset: { days: 1 }, set: { hour: 17, minutes: 30 } }),
-    participants: 11,
     maxParticipants: 14,
+    started: false,
     finished: false,
   },
   {
@@ -138,8 +142,8 @@ export const activities: Activity[] = [
     title: "Partido de bádminton 2v2",
     description: "Buscamos pareja de bádminton para practicar de cara a un torneo amateur.",
     date: createDate({ offset: { days: 1 }, set: { hour: 19, minutes: 0 } }),
-    participants: 2,
     maxParticipants: 4,
+    started: false,
     finished: false,
   },
   {
@@ -148,8 +152,8 @@ export const activities: Activity[] = [
     title: "Baloncesto. ¿Alguien?",
     description: "Vamos a jugar un partido amistoso contra el grupo de IES Garrido. Necesitamos algunos miembros para suplir vacantes.",
     date: createDate({ offset: { days: 1 }, set: { hour: 21, minutes: 45 } }),
-    participants: 5,
     maxParticipants: 8,
+    started: false,
     finished: false,
   },
   {
@@ -158,8 +162,8 @@ export const activities: Activity[] = [
     title: "Balonmano y dianas",
     description: "Práctica de puntería en el Pabellón Municipal de Cangas.",
     date: createDate({ set: { month: 9, day: 9, hour: 18, minutes: 45 } }),
-    participants: 6,
     maxParticipants: 10,
+    started: false,
     finished: true,
   },
   {
@@ -168,8 +172,8 @@ export const activities: Activity[] = [
     title: "Vamos a jugar un Reloj",
     description: "Algunas rondas de un divertido Reloj antes de jugar un partido entre amigos.",
     date: createDate({ set: { month: 9, day: 10, hour: 18, minutes: 0 } }),
-    participants: 12,
     maxParticipants: 16,
+    started: false,
     finished: true,
   },
   {
@@ -178,21 +182,21 @@ export const activities: Activity[] = [
     title: "Pachanga de balonmano",
     description: "Pachanga entre amigos. Buscamos gente que sepa de balonmano para poder realizar cambios y probar cosas nuevas.",
     date: createDate({ set: { month: 9, day: 10, hour: 20, minutes: 30 } }),
-    participants: 15,
     maxParticipants: 20,
+    started: false,
     finished: true,
   },
 ];
 
 export const activityParticipants: Record<Activity["id"], User["id"][]> = {
-  "0000": ["0000"],
-  "0001": ["0000", "0001"],
-  "0002": ["0002"],
-  "0003": ["0003"],
-  "0004": ["0004"],
-  "0005": ["0000", "0003"],
-  "0006": ["0000", "0001"],
-  "0007": ["0000"],
+  "0000": ["0000", ...generateTemporalUserIds(5)],
+  "0001": ["0000", "0001", ...generateTemporalUserIds(5)],
+  "0002": ["0002", ...generateTemporalUserIds(10)],
+  "0003": ["0003", ...generateTemporalUserIds(1)],
+  "0004": ["0004", ...generateTemporalUserIds(4)],
+  "0005": ["0000", "0003", ...generateTemporalUserIds(4)],
+  "0006": ["0000", "0001", ...generateTemporalUserIds(10)],
+  "0007": ["0000", ...generateTemporalUserIds(14)],
 };
 
 export function isUserInActivity(userId: string, activityId: string): boolean {

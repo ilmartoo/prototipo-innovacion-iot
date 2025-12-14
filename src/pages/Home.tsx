@@ -1,90 +1,98 @@
-import ActivitySummary from "@/components/ui/ActivitySummary";
+import ActivityList from "@/components/ui/ActivityList";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import type { Activity } from "@/data/models/activity";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
   activities,
+  activityParticipants,
   addUserToActivity,
   currentUser,
-  getUserById,
   isUserInActivity,
   removeUserFromActivity,
 } from "@/data/app-data";
-import { Link } from "react-router";
+import type { Activity } from "@/data/models/activity";
+import { SearchIcon } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+
+const dateNow = new Date();
 
 export default function Home() {
-  const now = new Date();
+  const navigate = useNavigate();
+  const [allActivities, setAllActivities] = useState(activities);
+  const [search, setSearch] = useState<string>("");
 
-  function getDateOffset(date: Date): number {
-    return Math.trunc((date.getTime() - now.getTime()) / 86400000);
-  }
-
-  function separateActivitiesByDate(activities: Activity[]): Record<string, Activity[]> {
-    return activities.reduce(
-      (record, activity) => {
-        const offset = `${getDateOffset(activity.date)}`;
-        if (record[offset]) {
-          record[offset].push(activity);
-        } else {
-          record[offset] = [activity];
-        }
-        return record;
-      },
-      {} as Record<string, Activity[]>
+  function isActivityInSearch(activity: Activity): boolean {
+    return (
+      activity.title.toLowerCase().includes(search) ||
+      activity.description.toLowerCase().includes(search)
     );
   }
 
-  function getDateOffsetDisplayString(offset: string): string {
-    if (offset === "0") {
-      return "Hoy";
-    } else if (offset === "1") {
-      return "Mañana";
-    } else if (offset === "-1") {
-      return "Ayer";
+  const pendingUserActivities: Activity[] = [];
+  const nextAvailableActivities: Activity[] = [];
+
+  allActivities.forEach((activ) => {
+    if (isActivityInSearch(activ)) {
+      if (isUserInActivity(currentUser.id, activ.id) && !activ.finished) {
+        pendingUserActivities.push(activ);
+      }
+      if (
+        !activ.started &&
+        activ.date > dateNow &&
+        activityParticipants[activ.id].length < activ.maxParticipants
+      ) {
+        nextAvailableActivities.push(activ);
+      }
+    }
+  });
+
+  function navigateToActivity(activity: Activity): void {
+    if (activity.started && !activity.finished) {
+      navigate(`/activity/${activity.id}/live`);
     } else {
-      const date = new Date(now);
-      date.setDate(date.getDate() + +offset);
-      return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
+      navigate(`/activity/${activity.id}/review`);
     }
   }
 
-  const userActivities = separateActivitiesByDate(
-    activities.filter((a) => isUserInActivity(currentUser.id, a.id) && !a.finished)
-  );
-  const nextActivities = separateActivitiesByDate(activities.filter((a) => a.date > now));
-
-  function toggleUserActivity(userId: string, activityId: string): void {
-    if (isUserInActivity(userId, activityId)) {
-      removeUserFromActivity(userId, activityId);
+  function toggleCurrentUserOnActivity(activity: Activity): void {
+    if (isUserInActivity(currentUser.id, activity.id)) {
+      removeUserFromActivity(currentUser.id, activity.id);
+      setAllActivities([...allActivities]);
     } else {
-      addUserToActivity(userId, activityId);
+      addUserToActivity(currentUser.id, activity.id);
+      setAllActivities([...allActivities]);
     }
   }
 
   return (
-    <div className="p-6">
-      <Link to="activity/0000/live">
-        <Button>View Activity Live Data</Button>
-      </Link>
+    <div className="flex flex-col gap-4">
+      <Button asChild className="w-full">
+        <Link to="/create-activity">Crear una actividad</Link>
+      </Button>
 
-      <Card>
-        <CardContent>
-          <CardTitle>Tus actividades pendientes</CardTitle>
-          {Object.keys(userActivities).map((offset, oi) => (
-            <div key={oi} className="mt-2 border-t flex flex-col gap-4">
-              <div className="py-2 text-muted-foreground">{getDateOffsetDisplayString(offset)}</div>
-              {userActivities[offset].map((activity, ai) => (
-                <ActivitySummary
-                  key={ai}
-                  activity={activity}
-                  userPicture={getUserById(activity.ownerId).picture}
-                  onIconClick={() => toggleUserActivity(activity.ownerId, activity.id)}
-                />
-              ))}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <InputGroup>
+        <InputGroupInput
+          placeholder="Buscar actividades..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <InputGroupAddon align="inline-end">
+          <SearchIcon />
+        </InputGroupAddon>
+      </InputGroup>
+
+      <ActivityList
+        title="Tus próximas actividades"
+        activities={pendingUserActivities}
+        onActivityClick={navigateToActivity}
+      />
+
+      <ActivityList
+        title="Actividades que buscan participantes"
+        activities={nextAvailableActivities}
+        isListing
+        onActivityClick={toggleCurrentUserOnActivity}
+      />
     </div>
   );
 }

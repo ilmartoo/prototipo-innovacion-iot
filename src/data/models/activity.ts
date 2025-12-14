@@ -4,8 +4,8 @@ export interface Activity {
   title: string;
   description: string;
   date: Date;
-  participants: number;
   maxParticipants: number;
+  started: boolean;
   finished: boolean;
 }
 
