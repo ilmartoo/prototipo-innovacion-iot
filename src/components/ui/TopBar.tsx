@@ -8,9 +8,10 @@ interface TopBarProps {
   description?: string;
   backTo?: string;
   children?: ReactNode;
+  titleClassName?: string;
 }
 
-export default function TopBar({ title, description, backTo = "/", children }: TopBarProps) {
+export default function TopBar({ title, description, backTo = "/", children, titleClassName }: TopBarProps) {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -20,7 +21,7 @@ export default function TopBar({ title, description, backTo = "/", children }: T
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <h1 className={titleClassName || "text-2xl font-bold tracking-tight"}>{title}</h1>
         </div>
         {children && (
           <div className="flex items-center gap-4">

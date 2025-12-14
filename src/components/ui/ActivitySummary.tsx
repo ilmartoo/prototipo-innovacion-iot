@@ -2,7 +2,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardFooter } from "@/components/ui/card";
 import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
-import { getActivityTime, type Activity } from "@/models/activity";
+import { getActivityTime, type Activity } from "@/data/models/activity";
 import { Clipboard, Clock4, Users } from "lucide-react";
 
 interface ActivitySummaryProps {

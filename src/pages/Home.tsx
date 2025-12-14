@@ -1,7 +1,7 @@
 import ActivitySummary from "@/components/ui/ActivitySummary";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import type { Activity } from "@/models/activity";
+import type { Activity } from "@/data/models/activity";
 import {
   activities,
   addUserToActivity,
@@ -9,7 +9,7 @@ import {
   getUserById,
   isUserInActivity,
   removeUserFromActivity,
-} from "@/models/app-data";
+} from "@/data/app-data";
 import { Link } from "react-router";
 
 export default function Home() {

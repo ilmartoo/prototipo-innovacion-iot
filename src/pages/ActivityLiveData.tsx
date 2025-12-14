@@ -1,38 +1,58 @@
 import { useState } from "react";
 import StatCard from "@/components/ui/StatCard";
 import TopBar from "@/components/ui/TopBar";
+import { activityRankings, users } from "@/data/app-data";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Clock } from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Clock, ChevronDown } from "lucide-react";
 
 export default function ActivityData() {
   const [selectedPlayer, setSelectedPlayer] = useState("global");
+
+  // Usar datos reales del ranking
+  const playersData = activityRankings.map(ranking => ({
+    id: ranking.position,
+    name: ranking.name.split(' ').slice(0, 2).map((n, i) => i === 0 ? n : n[0] + '.').join(' '),
+    goals: ranking.goals,
+    position: ranking.playingPosition,
+    avatar: ranking.picture,
+    userId: ranking.userId
+  }));
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <TopBar
         title="Datos de actividad"
-      />
-
-      {/* Card - Selector */}
-      <div className="flex items-center gap-2 mb-6">
-        <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="global">Global</SelectItem>
-            <SelectItem value="jugador1">Jugador 1</SelectItem>
-            <SelectItem value="jugador2">Jugador 2</SelectItem>
-            <SelectItem value="jugador3">Jugador 3</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        titleClassName="text-lg font-bold tracking-tight"
+      >
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-32 justify-between text-sm">
+              {selectedPlayer === "global" ? "Global" : 
+               users.find(u => u.id === selectedPlayer)?.name || "Seleccionar"}
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-32">
+            <DropdownMenuItem onClick={() => setSelectedPlayer("global")}>
+              Global
+            </DropdownMenuItem>
+            {users.map(user => (
+              <DropdownMenuItem key={user.id} onClick={() => setSelectedPlayer(user.id)}>
+                {user.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TopBar>
 
       {/* Card - Posicions en directo */}
       {/* Esto mo fixo chatgpt a partir da imagen, interesante */}
@@ -93,31 +113,33 @@ export default function ActivityData() {
       </div>
 
       {/* Card - Turno actual */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Turno actual
-          </span>
-        </div>
-        <div className="flex items-center">
-          <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400 mx-4" />
-        </div>
-        <div className="text-right">
-          <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            13 s restantes
+      <Card className="mb-6">
+        <CardContent className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-foreground">
+              Turno actual
+            </span>
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-            SAMUEL L.
+          <div className="flex items-center">
+            <Clock className="w-4 h-4 text-muted-foreground mx-4" />
           </div>
-        </div>
-      </div>
+          <div className="text-right">
+            <div className="text-lg font-semibold text-foreground">
+              13 s restantes
+            </div>
+            <div className="text-xs text-muted-foreground uppercase tracking-wide">
+              SAMUEL L.
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
    {/* Cards Datos*/}
       <div className="grid grid-cols-2 gap-4 mb-8">
         <StatCard
           value="13m 45s"
-          label="TIEMPO TURNO"
+          label="TIEMPO - 15 MIN"
           progress={75}
           progressColor="red"
         />      
@@ -127,6 +149,39 @@ export default function ActivityData() {
           progress={60}
           progressColor="blue"
         />
+      </div>
+
+      {/* Ranking de jugadores */}
+      <div className="mb-4">
+        <h2 className="text-xl font-semibold mb-3">Ranking</h2>
+        <Card>
+          <CardContent className="p-0">
+            {/* Encabezados */}
+            <div className="flex items-center justify-between px-4 pb-3 text-sm font-medium text-muted-foreground border-b">
+              <div className="w-12">Goles</div>
+              <div className="flex-1">Jugador</div>
+              <div>Posición</div>
+            </div>
+          
+          {/* Filas de datos */}
+          {playersData.map((player, index) => (
+            <div key={player.id}>
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="w-12 text-xl font-bold">{player.goals}</div>
+                <div className="flex-1 flex items-center gap-3">
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={player.avatar} />
+                    <AvatarFallback>{player.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{player.name}</span>
+                </div>
+                <div className="text-muted-foreground">{player.position}</div>
+              </div>
+              {index < playersData.length - 1 && <Separator />}
+            </div>
+          ))}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

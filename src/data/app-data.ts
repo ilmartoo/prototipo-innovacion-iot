@@ -3,8 +3,10 @@ import barbara from "@/assets/barbara.webp";
 import juan from "@/assets/juan.webp";
 import paulina from "@/assets/paulina.png";
 import samuel from "@/assets/samuel.webp";
-import type { Activity } from "@/models/activity";
-import type { User } from "@/models/user";
+import type { Activity } from "@/data/models/activity";
+import type { User } from "@/data/models/user";
+import type { ActivityRanking } from "@/data/models/activity-ranking";
+import { calculateRanking } from "@/data/models/activity-ranking";
 
 const dateNow = new Date();
 
@@ -104,8 +106,7 @@ export const activities: Activity[] = [
     id: "0000",
     ownerId: "0000",
     title: "Balonmano y puntería",
-    description:
-      "Práctica de puntería en el Pabellón Municipal de Pontevedra. Necesario conocimientos mínimos de balonmano. Luego quizás podamos jugar una pachanga.",
+    description: "Práctica de puntería en el Pabellón Municipal de Pontevedra. Necesario conocimientos mínimos de balonmano. Luego quizás podamos jugar una pachanga.",
     date: createDate({ offset: { minutes: -30 } }),
     participants: 6,
     maxParticipants: 10,
@@ -115,8 +116,7 @@ export const activities: Activity[] = [
     id: "0001",
     ownerId: "0001",
     title: "Un 21 con amigos",
-    description:
-      "Vamos a jugar un 21 y necesitamos a personas que les apetezca echarse unas partidas antes de un partido.",
+    description: "Vamos a jugar un 21 y necesitamos a personas que les apetezca echarse unas partidas antes de un partido.",
     date: createDate({ offset: { hours: 2 }, set: { minutes: 30 } }),
     participants: 7,
     maxParticipants: 12,
@@ -126,8 +126,7 @@ export const activities: Activity[] = [
     id: "0002",
     ownerId: "0002",
     title: "Pachanga de baloncesto",
-    description:
-      "Pachanga de baloncesto en Parque Cataluña. Necesitamos a gente con un poco de nivel para poder practicar.",
+    description: "Pachanga de baloncesto en Parque Cataluña. Necesitamos a gente con un poco de nivel para poder practicar.",
     date: createDate({ offset: { days: 1 }, set: { hour: 17, minutes: 30 } }),
     participants: 11,
     maxParticipants: 14,
@@ -147,8 +146,7 @@ export const activities: Activity[] = [
     id: "0004",
     ownerId: "0004",
     title: "Baloncesto. ¿Alguien?",
-    description:
-      "Vamos a jugar un partido amistoso contra el grupo de IES Garrido. Necesitamos algunos miembros para suplir vacantes.",
+    description: "Vamos a jugar un partido amistoso contra el grupo de IES Garrido. Necesitamos algunos miembros para suplir vacantes.",
     date: createDate({ offset: { days: 1 }, set: { hour: 21, minutes: 45 } }),
     participants: 5,
     maxParticipants: 8,
@@ -178,8 +176,7 @@ export const activities: Activity[] = [
     id: "0007",
     ownerId: "0000",
     title: "Pachanga de balonmano",
-    description:
-      "Pachanga entre amigos. Buscamos gente que sepa de balonmano para poder realizar cambios y probar cosas nuevas.",
+    description: "Pachanga entre amigos. Buscamos gente que sepa de balonmano para poder realizar cambios y probar cosas nuevas.",
     date: createDate({ set: { month: 9, day: 10, hour: 20, minutes: 30 } }),
     participants: 15,
     maxParticipants: 20,
@@ -211,3 +208,49 @@ export function addUserToActivity(userId: string, activityId: string): void {
 export function removeUserFromActivity(userId: string, activityId: string): void {
   activityParticipants[activityId] = activityParticipants[activityId].filter((id) => id !== userId);
 }
+
+// Datos mock para el ranking de actividad
+const mockActivityRankings: Omit<ActivityRanking, "position">[] = [
+  {
+    id: "ranking_0000",
+    userId: "0000",
+    name: `${users[0].name} ${users[0].surname}`,
+    picture: users[0].picture,
+    goals: 4,
+    playingPosition: "Extremo de",
+  },
+  {
+    id: "ranking_0001",
+    userId: "0001", 
+    name: `${users[1].name} ${users[1].surname}`,
+    picture: users[1].picture,
+    goals: 3,
+    playingPosition: "Lateral iz",
+  },
+  {
+    id: "ranking_0002",
+    userId: "0002",
+    name: `${users[2].name} ${users[2].surname}`,
+    picture: users[2].picture,
+    goals: 2,
+    playingPosition: "Lateral de",
+  },
+  {
+    id: "ranking_0003",
+    userId: "0003",
+    name: `${users[3].name} ${users[3].surname}`,
+    picture: users[3].picture,
+    goals: 6,
+    playingPosition: "Extremo iz",
+  },
+  {
+    id: "ranking_0004",
+    userId: "0004",
+    name: `${users[4].name} ${users[4].surname}`,
+    picture: users[4].picture,
+    goals: 1,
+    playingPosition: "Central",
+  },
+];
+
+export const activityRankings: ActivityRanking[] = calculateRanking(mockActivityRankings);
