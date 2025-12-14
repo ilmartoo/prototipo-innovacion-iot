@@ -23,12 +23,12 @@ export default function Layout() {
             <NavItem to="/" className="mr-4">
               <HouseIcon className="text-foreground size-6" />
             </NavItem>
-            <NavItem to="/activities" accent>
+            <NavItem to="/my-activities" accent>
               Mis actividades
             </NavItem>
             <NavItem to="/rankings">Rankings</NavItem>
             <ImagenPerfil
-              to="/profile"
+              to="/my-profile"
               src={currentUser.picture}
               nombre={currentUser.name}
               nivel={currentUser.level}
@@ -37,7 +37,7 @@ export default function Layout() {
           </NavigationMenuList>
         </NavigationMenu>
       </header>
-      <main className="p-6">
+      <main className="p-6 flex flex-col gap-4">
         <Outlet />
       </main>
     </div>

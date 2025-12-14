@@ -65,7 +65,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <Button asChild className="w-full">
         <Link to="/create-activity">Crear una actividad</Link>
       </Button>
@@ -93,6 +93,6 @@ export default function Home() {
         isListing
         onActivityClick={toggleCurrentUserOnActivity}
       />
-    </div>
+    </>
   );
 }
