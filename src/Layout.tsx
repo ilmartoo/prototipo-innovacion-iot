@@ -9,14 +9,18 @@ import { currentUser } from "@/data/app-data";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HouseIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Outlet } from "react-router";
+import { Outlet, useLocation } from "react-router";
 import { Button } from "./components/ui/button";
 
 export default function Layout() {
   const isMobile = useIsMobile();
+  const location = useLocation();
+
+  const hideHeader = location.pathname === "/my-profile";
 
   return (
     <div className="max-w-110 m-auto relative">
+      {!hideHeader && (
       <header className="flex items-center h-16 border-b px-2 sticky top-0 bg-background z-10">
         <NavigationMenu viewport={isMobile} className="max-w-none block">
           <NavigationMenuList className="w-full justify-start">
@@ -37,6 +41,7 @@ export default function Layout() {
           </NavigationMenuList>
         </NavigationMenu>
       </header>
+    )}
       <main className="p-6 flex flex-col gap-4">
         <Outlet />
       </main>
