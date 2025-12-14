@@ -209,8 +209,7 @@ export function removeUserFromActivity(userId: string, activityId: string): void
   activityParticipants[activityId] = activityParticipants[activityId].filter((id) => id !== userId);
 }
 
-// Datos mock para el ranking de actividad
-const mockActivityRankings: Omit<ActivityRanking, "position">[] = [
+const rankings: Omit<ActivityRanking, "position">[] = [
   {
     id: "ranking_0000",
     userId: "0000",
@@ -253,4 +252,4 @@ const mockActivityRankings: Omit<ActivityRanking, "position">[] = [
   },
 ];
 
-export const activityRankings: ActivityRanking[] = calculateRanking(mockActivityRankings);
+export const activityRankings: ActivityRanking[] = calculateRanking(rankings);
