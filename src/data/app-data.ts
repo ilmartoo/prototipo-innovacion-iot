@@ -4,9 +4,9 @@ import juan from "@/assets/juan.webp";
 import paulina from "@/assets/paulina.png";
 import samuel from "@/assets/samuel.webp";
 import type { Activity } from "@/data/models/activity";
-import type { User } from "@/data/models/user";
 import type { ActivityRanking } from "@/data/models/activity-ranking";
 import { calculateRanking } from "@/data/models/activity-ranking";
+import type { User } from "@/data/models/user";
 
 const dateNow = new Date();
 
@@ -110,7 +110,8 @@ export const activities: Activity[] = [
     id: "0000",
     ownerId: "0000",
     title: "Balonmano y puntería",
-    description: "Práctica de puntería en el Pabellón Municipal de Pontevedra. Necesario conocimientos mínimos de balonmano. Luego quizás podamos jugar una pachanga.",
+    description:
+      "Práctica de puntería en el Pabellón Municipal de Pontevedra. Necesario conocimientos mínimos de balonmano. Luego quizás podamos jugar una pachanga.",
     date: createDate({ offset: { minutes: -30 } }),
     maxParticipants: 10,
     started: true,
@@ -120,7 +121,8 @@ export const activities: Activity[] = [
     id: "0001",
     ownerId: "0001",
     title: "Un 21 con amigos",
-    description: "Vamos a jugar un 21 y necesitamos a personas que les apetezca echarse unas partidas antes de un partido.",
+    description:
+      "Vamos a jugar un 21 y necesitamos a personas que les apetezca echarse unas partidas antes de un partido.",
     date: createDate({ offset: { hours: 2 }, set: { minutes: 30 } }),
     maxParticipants: 12,
     started: false,
@@ -130,7 +132,8 @@ export const activities: Activity[] = [
     id: "0002",
     ownerId: "0002",
     title: "Pachanga de baloncesto",
-    description: "Pachanga de baloncesto en Parque Cataluña. Necesitamos a gente con un poco de nivel para poder practicar.",
+    description:
+      "Pachanga de baloncesto en Parque Cataluña. Necesitamos a gente con un poco de nivel para poder practicar.",
     date: createDate({ offset: { days: 1 }, set: { hour: 17, minutes: 30 } }),
     maxParticipants: 14,
     started: false,
@@ -150,7 +153,8 @@ export const activities: Activity[] = [
     id: "0004",
     ownerId: "0004",
     title: "Baloncesto. ¿Alguien?",
-    description: "Vamos a jugar un partido amistoso contra el grupo de IES Garrido. Necesitamos algunos miembros para suplir vacantes.",
+    description:
+      "Vamos a jugar un partido amistoso contra el grupo de IES Garrido. Necesitamos algunos miembros para suplir vacantes.",
     date: createDate({ offset: { days: 1 }, set: { hour: 21, minutes: 45 } }),
     maxParticipants: 8,
     started: false,
@@ -180,7 +184,8 @@ export const activities: Activity[] = [
     id: "0007",
     ownerId: "0000",
     title: "Pachanga de balonmano",
-    description: "Pachanga entre amigos. Buscamos gente que sepa de balonmano para poder realizar cambios y probar cosas nuevas.",
+    description:
+      "Pachanga entre amigos. Buscamos gente que sepa de balonmano para poder realizar cambios y probar cosas nuevas.",
     date: createDate({ set: { month: 9, day: 10, hour: 20, minutes: 30 } }),
     maxParticipants: 20,
     started: false,
@@ -189,7 +194,7 @@ export const activities: Activity[] = [
 ];
 
 export const activityParticipants: Record<Activity["id"], User["id"][]> = {
-  "0000": ["0000", ...generateTemporalUserIds(5)],
+  "0000": ["0000", ...generateTemporalUserIds(4)],
   "0001": ["0000", "0001", ...generateTemporalUserIds(5)],
   "0002": ["0002", ...generateTemporalUserIds(10)],
   "0003": ["0003", ...generateTemporalUserIds(1)],
@@ -224,7 +229,7 @@ const rankings: Omit<ActivityRanking, "position">[] = [
   },
   {
     id: "ranking_0001",
-    userId: "0001", 
+    userId: "0001",
     name: `${users[1].name} ${users[1].surname}`,
     picture: users[1].picture,
     goals: 3,
