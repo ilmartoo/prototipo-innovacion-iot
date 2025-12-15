@@ -2,6 +2,7 @@ import ActivityList from "@/components/ui/ActivityList";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import TopBar from "@/components/ui/TopBar";
 import { activities, currentUser, isUserInActivity } from "@/data/app-data";
 import type { Activity } from "@/data/models/activity";
 import { SearchIcon } from "lucide-react";
@@ -50,6 +51,8 @@ export default function MyActivities() {
 
   return (
     <>
+      <TopBar title="Mis actividades" to="/" />
+
       <Card>
         <CardContent>
           <Calendar

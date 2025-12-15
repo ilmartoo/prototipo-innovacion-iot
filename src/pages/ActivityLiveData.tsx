@@ -1,306 +1,245 @@
-import { useState } from "react";
-import StatCard from "@/components/ui/StatCard";
-import TopBar from "@/components/ui/TopBar";
-import { activityRankings, users } from "@/data/app-data";
+import handballFieldImage from "@/assets/handball-field.webp";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { Clock, ChevronDown } from "lucide-react";
+import StatCard from "@/components/ui/StatCard";
+import TopBar from "@/components/ui/TopBar";
+import UserAvatar from "@/components/ui/UserAvatar";
+import {
+  activityData,
+  activityPlayerData,
+  activityPlayerPositions,
+  activityRankings,
+} from "@/data/app-data";
+import type { ActivityRanking } from "@/data/models/activity-ranking";
+import type { Position } from "@/data/models/position";
+import { ChevronDown, ClockIcon } from "lucide-react";
+import { useState } from "react";
+import { useParams } from "react-router";
+import { getUserById } from "../data/app-data";
+
+function secondsToTimeString(seconds: number): string {
+  const min = +(seconds / 60).toFixed(0);
+  const s = seconds % 60;
+
+  return min > 0 ? `${min}m ${s}s` : `${s}s`;
+}
 
 export default function ActivityData() {
-  const [selectedPlayer, setSelectedPlayer] = useState("global");
+  const { activity: activityId } = useParams();
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
 
-  const playersData = activityRankings.map(ranking => ({
-    id: ranking.position,
-    name: ranking.name.split(' ').slice(0, 2).map((n, i) => i === 0 ? n : n[0] + '.').join(' '),
-    goals: ranking.goals,
-    position: ranking.playingPosition,
-    avatar: ranking.picture,
-    userId: ranking.userId
-  }));
+  const selectedPlayerData =
+    (selectedPlayerId && activityRankings[activityId!][selectedPlayerId]) || null;
 
-  const selectedPlayerData = selectedPlayer !== "global" 
-    ? playersData.find(p => p.userId === selectedPlayer)
-    : null;
+  function renderPlayerView(playerRanking: ActivityRanking<string>) {
+    const playerPos = activityPlayerPositions[activityId!][playerRanking.userId];
+    const playerData = activityPlayerData[activityId!][playerRanking.userId];
 
-  const renderPlayerView = () => {
-    if (!selectedPlayerData) return null;
-    
+    const lanzamientosExitososPorcentaje = +(
+      (playerData.lanzamientos.aciertos /
+        (playerData.lanzamientos.aciertos + playerData.lanzamientos.fallos)) *
+      100
+    ).toFixed(2);
+
     return (
-      <div>
-        {/* Card - Posicions en directo */}
-        <div className="flex justify-center mb-6">
-          <svg
-            width="300"
-            height="200"
-            viewBox="0 0 300 200"
-            className="border border-gray-200 rounded-lg shadow-sm"
-          >
-            {/* Court background */}
-            <rect width="300" height="200" fill="#FF8C00" />
-            
-            {/* Green border */}
-            <rect x="0" y="0" width="300" height="200" fill="none" stroke="#4CAF50" strokeWidth="8" />
-            
-            {/* Center line */}
-            <line x1="150" y1="0" x2="150" y2="200" stroke="white" strokeWidth="2" strokeDasharray="4,4" />
-            
-            {/* Center circle */}
-            <circle cx="150" cy="100" r="30" fill="none" stroke="white" strokeWidth="2" strokeDasharray="4,4" />
-            <circle cx="150" cy="100" r="8" fill="#FFD700" />
-            
-            {/* Left court area */}
-            <path
-              d="M 0 50 Q 60 50 60 100 Q 60 150 0 150"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeDasharray="4,4"
-            />
-            
-            {/* Right court area */}
-            <path
-              d="M 300 50 Q 240 50 240 100 Q 240 150 300 150"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeDasharray="4,4"
-            />
-            
-            {/* Left basket area */}
-            <rect x="0" y="80" width="20" height="40" fill="#4CAF50" />
-            
-            {/* Right basket area */}
-            <rect x="280" y="80" width="20" height="40" fill="#4CAF50" />
-
-            {/* Red team */}
-            <circle cx="100" cy="120" r="6" fill="#FF4444" stroke="white" strokeWidth="1" />
-            
-            {/* Blue team */}
-            <circle cx="220" cy="80" r="6" fill="#4488FF" stroke="white" strokeWidth="1" />
-          </svg>
-        </div>
+      <>
+        {/* Campo de juego */}
+        <CourtView blueTeam={[playerPos]} />
 
         {/* Estadísticas do xogador */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4">
           <StatCard
-            value="23 s"
-            label="TIEMPO TURNO"
+            value={secondsToTimeString(playerData.turno.tiempoActual)}
+            label="TIEMPO TOTAL DE TURNO"
+          />
+          <StatCard
+            value={playerData.turno.totalEnPosicionActual}
+            label="TURNOS EN POSICIÓN ACTUAL"
+          />
+          <StatCard
+            value={`${lanzamientosExitososPorcentaje}%`}
+            label="LANZAMIENTOS EXITOSOS"
+            progress={lanzamientosExitososPorcentaje}
+            progressColor="blue"
+          />
+          <StatCard value={playerData.lanzamientos.fallos} label="TIROS FUERA" />
+          <StatCard value={playerRanking.points} label="GOLES" />
+          <StatCard value={playerData.rachaDeAciertos} label="RACHA DE GOLES" />
+          <StatCard value={`${playerData.distanciaTiro.media}m`} label="DISTANCIA MEDIA DE TIRO" />
+          <StatCard value={`${playerData.distanciaTiro.actual}m`} label="DISTANCIA ACTUAL" />
+        </div>
+      </>
+    );
+  }
+
+  function renderGlobalView() {
+    const globalData = activityData[activityId!];
+    const currentPlayer = getUserById(globalData.turno.jugadorId);
+
+    let lanzamientosTotales = 0;
+    let lanzamientosExitosos = 0;
+
+    Object.values(activityPlayerData[activityId!]).forEach((p) => {
+      lanzamientosTotales += p.lanzamientos.aciertos + p.lanzamientos.fallos;
+      lanzamientosExitosos += p.lanzamientos.aciertos;
+    });
+
+    const lanzamientosExitososPorcentaje = +(
+      (lanzamientosExitosos / lanzamientosTotales) *
+      100
+    ).toFixed(2);
+
+    return (
+      <>
+        {/* Campo de juego */}
+        <CourtView blueTeam={Object.values(activityPlayerPositions[activityId!])} />
+
+        {/* Turno actual */}
+        <h2 className="text-xl font-semibold">Turno actual</h2>
+
+        <Item variant="outline" className="shadow-sm flex flex-row items-center justify-between">
+          <ItemTitle className="w-full">
+            <ItemMedia>
+              <ClockIcon className="size-4" />
+            </ItemMedia>
+
+            <div className="text-base font-semibold">
+              {secondsToTimeString(globalData.tiempo)} restantes
+            </div>
+
+            <div className="flex gap-2 ml-auto">
+              <UserAvatar userId={currentPlayer.id} size={6} /> {currentPlayer.name}
+            </div>
+          </ItemTitle>
+        </Item>
+
+        {/* Cards Datos*/}
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard
+            value={secondsToTimeString(globalData.tiempo)}
+            label="TIEMPO TOTAL"
             progress={75}
             progressColor="red"
           />
           <StatCard
-            value="2"
-            label="TURNOS EN POSICIÓN ACTUAL"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <StatCard
-            value="60%"
+            value={`${lanzamientosExitososPorcentaje}%`}
             label="LANZAMIENTOS EXITOSOS"
-            progress={60}
+            progress={lanzamientosExitososPorcentaje}
             progressColor="blue"
           />
-          <StatCard
-            value="2"
-            label="TIROS FUERA"
-          />
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <StatCard
-            value={`${selectedPlayerData.goals}`}
-            label="GOLES"
-          />
-          <StatCard
-            value="2"
-            label="RACHA DE GOLES"
-          />
-        </div>
+        {/* Ranking de xogadores */}
+        <h2 className="text-xl font-semibold">Ranking</h2>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <StatCard
-            value="3,44 m"
-            label="DISTANCIA MEDIA DE TIRO"
-          />
-          <StatCard
-            value="5,13 m"
-            label="DISTANCIA ACTUAL"
-          />
-        </div>
-      </div>
+        <Card>
+          <CardContent>
+            <div className="flex items-center justify-between px-4 pb-3 text-sm font-medium text-muted-foreground border-b">
+              <div className="w-1/5">Goles</div>
+              <div className="flex-1">Jugador</div>
+              <div>Posición</div>
+            </div>
+
+            {Object.values(activityRankings[activityId!]).map((ranking, index, arr) => (
+              <div key={ranking.id}>
+                <div className="flex items-center justify-between px-4 py-3">
+                  <div className="w-1/5 text-lg font-semibold">{ranking.points}</div>
+                  <div className="flex-1 flex items-center gap-2">
+                    <UserAvatar userId={ranking.userId} size={8} />
+                    <span>{getUserById(ranking.userId).name}</span>
+                  </div>
+                  <div className="text-muted-foreground">{ranking.payload}</div>
+                </div>
+                {index < arr.length - 1 && <Separator />}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </>
     );
-  };
+  }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <TopBar
-        title="Datos de actividad"
-        titleClassName="text-lg font-bold tracking-tight"
-      >
+    <>
+      <TopBar title="Datos de actividad" to="/">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="w-32 justify-between text-sm">
-              {selectedPlayer === "global" ? "Global" : 
-               users.find(u => u.id === selectedPlayer)?.name || "Seleccionar"}
-              <ChevronDown className="h-4 w-4" />
+              {selectedPlayerId ? getUserById(selectedPlayerId).name : "Global"}
+              <ChevronDown className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-32">
-            <DropdownMenuItem onClick={() => setSelectedPlayer("global")}>
-              Global
-            </DropdownMenuItem>
-            {users.map(user => (
-              <DropdownMenuItem key={user.id} onClick={() => setSelectedPlayer(user.id)}>
-                {user.name}
-              </DropdownMenuItem>
-            ))}
+          <DropdownMenuContent className="w-fit">
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => setSelectedPlayerId("")}>Global</DropdownMenuItem>
+            </DropdownMenuGroup>
+
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-sm italic font-medium text-muted-foreground">
+                Jugadores
+              </DropdownMenuLabel>
+              {Object.keys(activityPlayerData[activityId!]).map((userId) => {
+                const user = getUserById(userId);
+                return (
+                  <DropdownMenuItem key={userId} onClick={() => setSelectedPlayerId(userId)}>
+                    {user.name} {user.surname}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </TopBar>
 
       {/* Renderizado condicional */}
-      {selectedPlayer === "global" ? (
-        <>
-      {/* Card - Posicions en directo */}
-      {/* Esto mo fixo chatgpt a partir da imagen, interesante */}
-      <div className="flex justify-center mb-6">
-        <svg
-          width="300"
-          height="200"
-          viewBox="0 0 300 200"
-          className="border border-gray-200 rounded-lg shadow-sm"
-        >
-          {/* Court background */}
-          <rect width="300" height="200" fill="#FF8C00" />
-          
-          {/* Green border */}
-          <rect x="0" y="0" width="300" height="200" fill="none" stroke="#4CAF50" strokeWidth="8" />
-          
-          {/* Center line */}
-          <line x1="150" y1="0" x2="150" y2="200" stroke="white" strokeWidth="2" strokeDasharray="4,4" />
-          
-          {/* Center circle */}
-          <circle cx="150" cy="100" r="30" fill="none" stroke="white" strokeWidth="2" strokeDasharray="4,4" />
-          <circle cx="150" cy="100" r="8" fill="#FFD700" />
-          
-          {/* Left court area */}
-          <path
-            d="M 0 50 Q 60 50 60 100 Q 60 150 0 150"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeDasharray="4,4"
+      {selectedPlayerData ? renderPlayerView(selectedPlayerData) : renderGlobalView()}
+    </>
+  );
+}
+
+interface CourtViewProps {
+  blueTeam?: Position[];
+  redTeam?: Position[];
+}
+
+function CourtView(props: CourtViewProps) {
+  const fieldSize: Position = { x: 740, y: 443 };
+  const playingFieldStart: Position = { x: 53, y: 22 };
+  // const playingFieldSize: Position = { x: 634, y: 401 };
+
+  return (
+    <div className="w-full relative border rounded-lg shadow-sm overflow-hidden">
+      <img src={handballFieldImage} alt="Playing field background" className="w-full" />
+      <svg viewBox={`0 0 ${fieldSize.x} ${fieldSize.y}`} className="absolute top-0 w-full">
+        {props.blueTeam?.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x + playingFieldStart.x}
+            cy={p.y + playingFieldStart.y}
+            r="12"
+            className="fill-blue-500 stroke-2 stroke-white"
           />
-          
-          {/* Right court area */}
-          <path
-            d="M 300 50 Q 240 50 240 100 Q 240 150 300 150"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeDasharray="4,4"
+        ))}
+        {props.redTeam?.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x + playingFieldStart.x}
+            cy={p.y + playingFieldStart.y}
+            r="12"
+            className="fill-red-500 stroke-2 stroke-white"
           />
-          
-          {/* Left basket area */}
-          <rect x="0" y="80" width="20" height="40" fill="#4CAF50" />
-          
-          {/* Right basket area */}
-          <rect x="280" y="80" width="20" height="40" fill="#4CAF50" />
-          
-          {/* Players */}
-          {/* Red team */}
-          <circle cx="80" cy="60" r="6" fill="#FF4444" stroke="white" strokeWidth="1" />
-          <circle cx="120" cy="40" r="6" fill="#FF4444" stroke="white" strokeWidth="1" />
-          <circle cx="100" cy="120" r="6" fill="#FF4444" stroke="white" strokeWidth="1" />
-          <circle cx="70" cy="160" r="6" fill="#FF4444" stroke="white" strokeWidth="1" />
-          
-          {/* Blue team */}
-          <circle cx="220" cy="80" r="6" fill="#4488FF" stroke="white" strokeWidth="1" />
-        </svg>
-      </div>
-
-      {/* Card - Turno actual */}
-      <Card className="mb-6">
-        <CardContent className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-foreground">
-              Turno actual
-            </span>
-          </div>
-          <div className="flex items-center">
-            <Clock className="w-4 h-4 text-muted-foreground mx-4" />
-          </div>
-          <div className="text-right">
-            <div className="text-lg font-semibold text-foreground">
-              13 s restantes
-            </div>
-            <div className="text-xs text-muted-foreground uppercase tracking-wide">
-              SAMUEL L.
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-   {/* Cards Datos*/}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <StatCard
-          value="13m 45s"
-          label="TIEMPO - 15 MIN"
-          progress={75}
-          progressColor="red"
-        />      
-        <StatCard
-          value="60%"
-          label="LANZAMIENTOS EXITOSOS"
-          progress={60}
-          progressColor="blue"
-        />
-      </div>
-
-      {/* Ranking de xogadores */}
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-3">Ranking</h2>
-        <Card>
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between px-4 pb-3 text-sm font-medium text-muted-foreground border-b">
-              <div className="w-12">Goles</div>
-              <div className="flex-1">Jugador</div>
-              <div>Posición</div>
-            </div>
-          
-          {playersData.map((player, index) => (
-            <div key={player.id}>
-              <div className="flex items-center justify-between px-4 py-3">
-                <div className="w-12 text-xl font-bold">{player.goals}</div>
-                <div className="flex-1 flex items-center gap-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={player.avatar} />
-                    <AvatarFallback>{player.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium">{player.name}</span>
-                </div>
-                <div className="text-muted-foreground">{player.position}</div>
-              </div>
-              {index < playersData.length - 1 && <Separator />}
-            </div>
-          ))}
-          </CardContent>
-        </Card>
-      </div>
-        </>
-      ) : (
-        renderPlayerView()
-      )}
+        ))}
+      </svg>
     </div>
   );
 }
