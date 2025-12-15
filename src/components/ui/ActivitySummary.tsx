@@ -1,6 +1,6 @@
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { activityParticipants, currentUser, getUserById, isUserInActivity } from "@/data/app-data";
 import { getActivityTime, type Activity } from "@/data/models/activity";
 import {
@@ -72,9 +72,7 @@ export default function ActivitySummary(props: ActivitySummaryProps) {
         </ActivityDataRow>
         <ActivityDataRow>
           <div className="flex items-center gap-2">
-            <Avatar className="size-6">
-              <AvatarImage src={owner.picture} alt="Activity owner picture" />
-            </Avatar>
+            <UserAvatar userId={owner.id} size={6} />
             <span className="line-clamp-1">
               {owner.name} {owner.surname}
             </span>

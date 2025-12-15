@@ -1,18 +1,23 @@
-export interface ActivityRanking {
+export interface ActivityRanking<T> {
   id: string;
   userId: string;
-  name: string;
-  picture: string;
-  goals: number;
-  position: number;
-  playingPosition: string;
+  points: number;
+  rank: number;
+  payload: T;
 }
 
-export function calculateRanking(rankings: Omit<ActivityRanking, "position">[]): ActivityRanking[] {
+export type ActivityRankingPending<T> = Omit<ActivityRanking<T>, "rank">;
+
+export function calculateRanking<T>(
+  rankings: ActivityRankingPending<T>[]
+): Record<string, ActivityRanking<T>> {
   return rankings
-    .sort((a, b) => b.goals - a.goals)
-    .map((ranking, index) => ({
-      ...ranking,
-      position: index + 1,
-    }));
+    .sort((a, b) => b.points - a.points)
+    .reduce(
+      (map, current, index) => ({
+        ...map,
+        [current.userId]: { ...current, rank: index + 1 },
+      }),
+      {}
+    );
 }

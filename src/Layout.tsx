@@ -1,16 +1,16 @@
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { currentUser } from "@/data/app-data";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HouseIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Outlet } from "react-router";
-import { Button } from "./components/ui/button";
 
 export default function Layout() {
   const isMobile = useIsMobile();
@@ -31,6 +31,7 @@ export default function Layout() {
               to="/my-profile"
               src={currentUser.picture}
               nombre={currentUser.name}
+              userId={currentUser.id}
               nivel={currentUser.level}
               className="ml-auto"
             />
@@ -47,6 +48,7 @@ export default function Layout() {
 interface ImagenPerfilProps {
   className?: string;
   src: string;
+  userId: string;
   nombre: string;
   nivel: number;
   to: string;
@@ -57,9 +59,7 @@ function ImagenPerfil(props: ImagenPerfilProps) {
     <NavigationMenuItem className={props.className}>
       <Button asChild variant="ghost" className="flex flex-row gap-2 h-fit items-center px-2 py-1">
         <NavigationMenuLink href={props.to}>
-          <Avatar className="grow">
-            <AvatarImage src={props.src} alt="Imagen de perfil" />
-          </Avatar>
+          <UserAvatar className="grow" userId={props.userId} />
           <div className="flex flex-col">
             <h2>{props.nombre}</h2>
             <h3 className="font-normal text-muted-foreground">Nivel {props.nivel}</h3>
