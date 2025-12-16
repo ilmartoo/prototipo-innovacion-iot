@@ -2,6 +2,7 @@ import ActivitySummary from "@/components/ui/ActivitySummary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Activity } from "@/data/models/activity";
 import type { ReactNode } from "react";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader } from "./empty";
 
 interface ActivityListProps {
   children?: ReactNode;
@@ -9,6 +10,8 @@ interface ActivityListProps {
   activities: Activity[];
   isListing?: boolean;
   onActivityClick: (activity: Activity) => void;
+  emptyText?: string;
+  emptyAction?: ReactNode;
 }
 
 const dateNow = new Date();
@@ -56,21 +59,32 @@ export default function ActivityList(props: ActivityListProps) {
         {props.children}
       </CardHeader>
       <CardContent>
-        {Object.keys(activities).map((offset, oi) => (
-          <div key={oi} className="flex flex-col gap-4">
-            <div className="pt-2 mt-4 border-t text-muted-foreground font-semibold text-sm">
-              {getDateOffsetDisplayString(offset)}
+        {props.activities.length ? (
+          Object.keys(activities).map((offset, oi) => (
+            <div key={oi} className="flex flex-col gap-4">
+              <div className="pt-2 mt-4 border-t text-muted-foreground font-semibold text-sm">
+                {getDateOffsetDisplayString(offset)}
+              </div>
+              {activities[offset].map((activity, ai) => (
+                <ActivitySummary
+                  key={ai}
+                  activity={activity}
+                  onIconClick={() => props.onActivityClick(activity)}
+                  isListing={props.isListing}
+                />
+              ))}
             </div>
-            {activities[offset].map((activity, ai) => (
-              <ActivitySummary
-                key={ai}
-                activity={activity}
-                onIconClick={() => props.onActivityClick(activity)}
-                isListing={props.isListing}
-              />
-            ))}
-          </div>
-        ))}
+          ))
+        ) : (
+          <Empty className="pt-2 mt-4 border-t rounded-none border-solid">
+            {props.emptyText && (
+              <EmptyHeader>
+                <EmptyDescription>{props.emptyText}</EmptyDescription>
+              </EmptyHeader>
+            )}
+            {props.emptyAction && <EmptyContent>{props.emptyAction}</EmptyContent>}
+          </Empty>
+        )}
       </CardContent>
     </Card>
   );

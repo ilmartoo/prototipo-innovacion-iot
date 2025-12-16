@@ -28,16 +28,16 @@ export default function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn("p-4 bg-gray-50 border-0 shadow-sm", className)}>
-      <CardContent className="flex flex-col p-0 gap-2 h-full">
+    <Card className={cn("p-4 bg-gray-50 border-0", className)}>
+      <CardContent className="flex flex-col p-0 gap-2">
         <div className="text-2xl font-bold text-gray-900">{value}</div>
 
         <div className="space-y-1">
-          <div className="text-sm font-medium text-gray-600 uppercase tracking-wide">{label}</div>
+          <div className="text-sm font-medium text-gray-600 tracking-wide">{label}</div>
           {subtitle && <div className="text-xs text-gray-500">{subtitle}</div>}
         </div>
 
-        {progress !== undefined && (
+        {progress != null && (
           <Progress
             value={progress}
             className={cn("mt-auto h-2 bg-gray-200", progressColorClasses[progressColor])}

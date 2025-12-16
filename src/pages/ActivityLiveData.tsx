@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
+import SectionTitle from "@/components/ui/SectionTitle";
 import StatCard from "@/components/ui/StatCard";
 import {
   Table,
@@ -60,6 +61,7 @@ export default function ActivityData() {
     return (
       <>
         {/* Campo de juego */}
+        <SectionTitle>Posición en el campo</SectionTitle>
         <CourtView blueTeam={[playerPos]} />
 
         {/* Estadísticas do xogador */}
@@ -108,10 +110,11 @@ export default function ActivityData() {
     return (
       <>
         {/* Campo de juego */}
+        <SectionTitle>Posiciones de los jugadores</SectionTitle>
         <CourtView blueTeam={Object.values(activityPlayerPositions[activityId!])} />
 
         {/* Turno actual */}
-        <h2 className="text-xl font-semibold">Turno actual</h2>
+        <SectionTitle>Turno actual</SectionTitle>
 
         <Item variant="outline" className="shadow-sm flex flex-row items-center justify-between">
           <ItemTitle className="w-full">
@@ -146,7 +149,7 @@ export default function ActivityData() {
         </div>
 
         {/* Ranking de xogadores */}
-        <h2 className="text-xl font-semibold">Ranking</h2>
+        <SectionTitle>Ranking</SectionTitle>
 
         <Card>
           <CardContent>

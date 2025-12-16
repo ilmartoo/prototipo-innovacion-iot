@@ -85,6 +85,12 @@ export default function Home() {
         title="Tus próximas actividades"
         activities={pendingUserActivities}
         onActivityClick={navigateToActivity}
+        emptyText="No tienes actividades futuras"
+        emptyAction={
+          <Button asChild variant="outline">
+            <Link to="/create-activity">Crea una actividad</Link>
+          </Button>
+        }
       />
 
       <ActivityList
@@ -92,6 +98,7 @@ export default function Home() {
         activities={nextAvailableActivities}
         isListing
         onActivityClick={toggleCurrentUserOnActivity}
+        emptyText="No existen actividades que busquen participantes"
       />
     </>
   );
