@@ -10,7 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-export function DateTimePicker24h() {
+interface DateTimePicker24hProps {
+  id?: string;
+  disabled?: boolean;
+}
+
+export function DateTimePicker24h(props: DateTimePicker24hProps) {
   const [date, setDate] = React.useState<Date>();
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -37,6 +42,8 @@ export function DateTimePicker24h() {
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={props.id}
+          disabled={props.disabled}
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",
@@ -44,7 +51,7 @@ export function DateTimePicker24h() {
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "DD/MM/yyyy HH:mm") : <span>DD/MM/AAAA hh:mm</span>}
+          {date ? format(date, "dd/MM/yyyy HH:mm") : <span>dd/mm/aaaa --:--</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
