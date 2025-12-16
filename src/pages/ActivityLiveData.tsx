@@ -9,12 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
-<<<<<<< HEAD
-import SectionTitle from "@/components/ui/SectionTitle";
-=======
 import RankingTable from "@/components/ui/RankingTable";
->>>>>>> 5b9d43f (feat: adjust review screen)
-import StatCard from "@/components/ui/StatCard";
+import SectionTitle from "@/components/ui/SectionTitle";import StatCard from "@/components/ui/StatCard";
 import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {

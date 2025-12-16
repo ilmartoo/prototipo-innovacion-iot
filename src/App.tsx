@@ -14,11 +14,7 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="activity/:activity">
           <Route path="live" element={<ActivityLiveData />} />
-<<<<<<< HEAD
-          {/* <Route path="/summary" element={<ActivitySummaryData />} /> */}
-=======
-          <Route path="review" element={<ActivityReviewData />} /> 
->>>>>>> 5b9d43f (feat: adjust review screen)
+          <Route path="review" element={<ActivityReviewData />} />
         </Route>
         <Route path="create-activity" element={<CreateActivity />} />
         <Route path="my-activities" element={<MyActivities />} />
