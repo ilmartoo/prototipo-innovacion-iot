@@ -5,6 +5,7 @@ export interface User {
   picture: string;
   level: number;
   completedActivities: number;
+  birthDate: string;
 }
 
 export function activitiesToNextLevel(level: number, completedActivities: number): number {
