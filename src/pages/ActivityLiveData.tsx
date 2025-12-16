@@ -10,8 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
-import { Separator } from "@/components/ui/separator";
 import StatCard from "@/components/ui/StatCard";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
@@ -30,7 +37,6 @@ import { getUserById } from "../data/app-data";
 function secondsToTimeString(seconds: number): string {
   const min = +(seconds / 60).toFixed(0);
   const s = seconds % 60;
-
   return min > 0 ? `${min}m ${s}s` : `${s}s`;
 }
 
@@ -144,25 +150,35 @@ export default function ActivityData() {
 
         <Card>
           <CardContent>
-            <div className="flex items-center justify-between px-4 pb-3 text-sm font-medium text-muted-foreground border-b">
-              <div className="w-1/5">Goles</div>
-              <div className="flex-1">Jugador</div>
-              <div>Posición</div>
-            </div>
-
-            {Object.values(activityRankings[activityId!]).map((ranking, index, arr) => (
-              <div key={ranking.id}>
-                <div className="flex items-center justify-between px-4 py-3">
-                  <div className="w-1/5 text-lg font-semibold">{ranking.points}</div>
-                  <div className="flex-1 flex items-center gap-2">
-                    <UserAvatar userId={ranking.userId} size={8} />
-                    <span>{getUserById(ranking.userId).name}</span>
-                  </div>
-                  <div className="text-muted-foreground">{ranking.payload}</div>
-                </div>
-                {index < arr.length - 1 && <Separator />}
-              </div>
-            ))}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">Goles</TableHead>
+                  <TableHead>Jugador</TableHead>
+                  <TableHead className="text-center">Posición</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Object.values(activityRankings[activityId!])
+                  .sort((a, b) => a.rank - b.rank)
+                  .map((ranking) => (
+                    <TableRow key={ranking.id}>
+                      <TableCell className="text-center font-semibold text-lg">
+                        {ranking.points}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <UserAvatar userId={ranking.userId} size={8} />
+                          <span className="font-medium">{getUserById(ranking.userId).name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center text-muted-foreground">
+                        {ranking.payload}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </>
