@@ -1,6 +1,5 @@
 import handballFieldImage from "@/assets/handball-field.webp";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,16 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
+<<<<<<< HEAD
 import SectionTitle from "@/components/ui/SectionTitle";
+=======
+import RankingTable from "@/components/ui/RankingTable";
+>>>>>>> 5b9d43f (feat: adjust review screen)
 import StatCard from "@/components/ui/StatCard";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
@@ -151,39 +146,7 @@ export default function ActivityData() {
         {/* Ranking de xogadores */}
         <SectionTitle>Ranking</SectionTitle>
 
-        <Card>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center">Goles</TableHead>
-                  <TableHead>Jugador</TableHead>
-                  <TableHead className="text-center">Posición</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Object.values(activityRankings[activityId!])
-                  .sort((a, b) => a.rank - b.rank)
-                  .map((ranking) => (
-                    <TableRow key={ranking.id}>
-                      <TableCell className="text-center font-semibold text-lg">
-                        {ranking.points}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <UserAvatar userId={ranking.userId} size={8} />
-                          <span className="font-medium">{getUserById(ranking.userId).name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center text-muted-foreground">
-                        {ranking.payload}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <RankingTable rankings={activityRankings[activityId!]} />
       </>
     );
   }

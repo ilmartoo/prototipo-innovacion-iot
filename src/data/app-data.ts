@@ -257,6 +257,32 @@ export const activityRankings: Record<string, Record<string, ActivityRanking<str
       payload: "Central",
     },
   ]),
+  "A-0001": calculateRanking([
+    {
+      id: "R-1000",
+      userId: "U-0004",
+      points: 7,
+      payload: "Ganador",
+    },
+    {
+      id: "R-1001",
+      userId: "U-0000",
+      points: 6,
+      payload: "Penalti",
+    },
+    {
+      id: "R-1002",
+      userId: "U-0003",
+      points: 4,
+      payload: "Extremo De.",
+    },
+    {
+      id: "R-1003",
+      userId: "U-0001",
+      points: 3,
+      payload: "Central",
+    },
+  ]),
 };
 
 export const activityPlayerPositions: Record<string, Record<string, Position>> = {
@@ -266,6 +292,12 @@ export const activityPlayerPositions: Record<string, Record<string, Position>> =
     "U-0002": { x: 211, y: 241 },
     "U-0003": { x: 148, y: 321 },
     "U-0004": { x: 464, y: 160 },
+  },
+  "A-0001": {
+    "U-0000": { x: 200, y: 150 },
+    "U-0001": { x: 320, y: 200 },
+    "U-0003": { x: 180, y: 280 },
+    "U-0004": { x: 400, y: 180 },
   },
 };
 
@@ -354,6 +386,68 @@ export const activityPlayerData: Record<string, Record<string, ActivityPlayerDat
       distanciaTiro: {
         media: 6.67,
         actual: 6.22,
+      },
+    },
+  },
+  "A-0001": {
+    "U-0000": {
+      turno: {
+        tiempoActual: 78,
+        totalEnPosicionActual: 3,
+      },
+      lanzamientos: {
+        aciertos: 6,
+        fallos: 1,
+      },
+      rachaDeAciertos: 3,
+      distanciaTiro: {
+        media: 6.2,
+        actual: 6.8,
+      },
+    },
+    "U-0001": {
+      turno: {
+        tiempoActual: 45,
+        totalEnPosicionActual: 2,
+      },
+      lanzamientos: {
+        aciertos: 3,
+        fallos: 2,
+      },
+      rachaDeAciertos: 1,
+      distanciaTiro: {
+        media: 6.5,
+        actual: 6.3,
+      },
+    },
+    "U-0003": {
+      turno: {
+        tiempoActual: 68,
+        totalEnPosicionActual: 2,
+      },
+      lanzamientos: {
+        aciertos: 4,
+        fallos: 1,
+      },
+      rachaDeAciertos: 2,
+      distanciaTiro: {
+        media: 6.7,
+        actual: 6.9,
+      },
+    },
+    "U-0004": {
+      turno: {
+        tiempoActual: 92,
+        totalEnPosicionActual: 4,
+      },
+      lanzamientos: {
+        aciertos: 7,
+        fallos: 0,
+      },
+      rachaDeAciertos: 5,
+      distanciaTiro: {
+        media: 6.1,
+        actual: 5.8,
       },
     },
   },
