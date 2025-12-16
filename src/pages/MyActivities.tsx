@@ -54,9 +54,9 @@ export default function MyActivities() {
       <TopBar title="Mis actividades" to="/" />
 
       <Card>
-        <CardContent>
+        <CardContent className="">
           <Calendar
-            className="w-full"
+            className="w-full p-0"
             mode="range"
             captionLayout="label"
             selected={dateRange}
