@@ -17,7 +17,7 @@ export default function Layout() {
   const isMobile = useIsMobile();
   const location = useLocation();
   const path = location.pathname
-  const hideHeader = location.pathname === "/my-profile";
+  const hideHeader = location.pathname === "/my-profile" || location.pathname === "/create-activity";
 
   return (
   <div className="max-w-110 m-auto relative">

@@ -3,6 +3,7 @@ import ActivityLiveData from "@/pages/ActivityLiveData";
 import Home from "@/pages/Home";
 import MyActivities from "@/pages/MyActivities";
 import MyProfile from "@/pages/MyProfile";
+import CreateActivities from "./pages/NewActivities";
 import { Route, Routes } from "react-router";
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="live" element={<ActivityLiveData />} />
           {/* <Route path="/review" element={<ActivityReviewData />} /> */}
         </Route>
+        <Route path="/create-activity" element={<CreateActivities />} />
         <Route path="/my-activities" element={<MyActivities />} />
         <Route path="/my-profile" element={<MyProfile />}/>
         {/* <Route path="/rakings" element={<Rankings />}/> */}

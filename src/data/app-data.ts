@@ -65,6 +65,7 @@ export const users: User[] = [
     picture: paulina,
     level: 37,
     completedActivities: 14,
+    birthDate: "22 de Agosto del 1990",
   },
   {
     id: "U-0001",
@@ -73,6 +74,7 @@ export const users: User[] = [
     picture: juan,
     level: 28,
     completedActivities: 21,
+    birthDate: "22 de Agosto del 1990",
   },
   {
     id: "U-0002",
@@ -81,6 +83,7 @@ export const users: User[] = [
     picture: barbara,
     level: 14,
     completedActivities: 9,
+    birthDate: "22 de Agosto del 1990",
   },
   {
     id: "U-0003",
@@ -89,6 +92,7 @@ export const users: User[] = [
     picture: alba,
     level: 45,
     completedActivities: 20,
+    birthDate: "22 de Agosto del 1990",
   },
   {
     id: "U-0004",
@@ -97,6 +101,7 @@ export const users: User[] = [
     picture: samuel,
     level: 24,
     completedActivities: 2,
+    birthDate: "22 de Agosto del 1990",
   },
 ];
 
@@ -353,3 +358,9 @@ export const activityPlayerData: Record<string, Record<string, ActivityPlayerDat
     },
   },
 };
+
+export const sportsList = [
+  { value: "handball", label: "Balonmano" },
+  { value: "basketball", label: "Baloncesto" },
+  { value: "volleyball", label: "Voleibol" },
+];
