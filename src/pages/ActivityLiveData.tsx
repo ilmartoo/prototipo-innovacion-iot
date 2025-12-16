@@ -1,7 +1,6 @@
 import activityDataJSON from "@/assets/activity-data/A-0000.json";
 import handballFieldImage from "@/assets/fields/handball-field.webp";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,16 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
+import RankingTable from "@/components/ui/RankingTable";
 import SectionTitle from "@/components/ui/SectionTitle";
 import StatCard from "@/components/ui/StatCard";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { activityParticipants, getUserById } from "@/data/app-data";
@@ -261,37 +253,7 @@ export default function ActivityData() {
         {/* Ranking de xogadores */}
         <SectionTitle>Ranking</SectionTitle>
 
-        <Card>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center">Goles</TableHead>
-                  <TableHead>Jugador</TableHead>
-                  <TableHead className="text-center">Posición</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Object.values(playerRanking).map((ranking) => (
-                  <TableRow key={ranking.userId}>
-                    <TableCell className="text-center font-semibold text-lg">
-                      {ranking.points}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <UserAvatar userId={ranking.userId} size={8} />
-                        <span className="font-medium">{getUserById(ranking.userId).name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center text-muted-foreground">
-                      {ranking.payload}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <RankingTable rankings={playerRanking} />
       </>
     );
   }
