@@ -1,4 +1,5 @@
-import handballFieldImage from "@/assets/handball-field.webp";
+import activityDataJSON from "@/assets/activity-data/A-0000.json";
+import handballFieldImage from "@/assets/fields/handball-field.webp";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,99 +11,204 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
 import RankingTable from "@/components/ui/RankingTable";
-import SectionTitle from "@/components/ui/SectionTitle";import StatCard from "@/components/ui/StatCard";
+import SectionTitle from "@/components/ui/SectionTitle";
+import StatCard from "@/components/ui/StatCard";
 import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
-import {
-  activityData,
-  activityPlayerData,
-  activityPlayerPositions,
-  activityRankings,
-} from "@/data/app-data";
-import type { ActivityRanking } from "@/data/models/activity-ranking";
+import { activityParticipants, getUserById } from "@/data/app-data";
+import type { ActivityData } from "@/data/models/activity";
+import { calculateRanking } from "@/data/models/activity-ranking";
 import type { Position } from "@/data/models/position";
+import {
+  processExistingRealTimeData,
+  processRealTimeEvent,
+  processTimePassing,
+  type RealTimeEvent,
+} from "@/data/models/real-time";
 import { ChevronDown, ClockIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { getUserById } from "../data/app-data";
+
+const activityRealTimeEvents = (activityDataJSON as RealTimeEvent[]).sort(
+  (a, b) => a.timestamp - b.timestamp
+);
 
 function secondsToTimeString(seconds: number): string {
-  const min = +(seconds / 60).toFixed(0);
-  const s = seconds % 60;
+  const min = Math.trunc(seconds / 60);
+  const s = Math.round(seconds % 60);
   return min > 0 ? `${min}m ${s}s` : `${s}s`;
+}
+
+function toFixed2(value: number): number {
+  return +value.toFixed(2);
+}
+
+function toPercentageFixed2(value: number): number {
+  return toFixed2(value * 100);
 }
 
 export default function ActivityData() {
   const { activity: activityId } = useParams();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
 
-  const selectedPlayerData =
-    (selectedPlayerId && activityRankings[activityId!][selectedPlayerId]) || null;
+  let realTimeDataIndex = Math.round((3 * activityRealTimeEvents.length) / 4);
 
-  function renderPlayerView(playerRanking: ActivityRanking<string>) {
-    const playerPos = activityPlayerPositions[activityId!][playerRanking.userId];
-    const playerData = activityPlayerData[activityId!][playerRanking.userId];
+  const [activityData, setActivityData] = useState(
+    processExistingRealTimeData(
+      {
+        participants: activityParticipants[activityId!],
+        playingPositions: [
+          "Extremo I",
+          "Lateral I",
+          "Central",
+          "Lateral D",
+          "Extremo D",
+          "Pivote",
+          "Penalti",
+        ],
+        maxTurnTime: 30,
+        scales: {
+          field: { x: 40 / 100, y: 20 / 100 },
+          goalPost: { x: 3 / 100, y: 2 / 100 },
+        },
+        locations: {
+          goalPost: { x: 100, y: 50 },
+        },
+        winnerCheck: (playerId: string, data: ActivityData) => {
+          return data.playerData[playerId].shots.in >= 7;
+        },
+      },
+      activityRealTimeEvents,
+      activityRealTimeEvents[realTimeDataIndex].timestamp
+    )
+  );
 
-    const lanzamientosExitososPorcentaje = +(
-      (playerData.lanzamientos.aciertos /
-        (playerData.lanzamientos.aciertos + playerData.lanzamientos.fallos)) *
-      100
-    ).toFixed(2);
+  useEffect(() => {
+    const intervalTimeSecs = 0.3;
+    const intervalId = setInterval(() => {
+      setActivityData((currentData) => {
+        const targetTime = currentData.elapsedTime + intervalTimeSecs;
+        const events = activityRealTimeEvents.filter(
+          (e) => e.timestamp > currentData.elapsedTime && e.timestamp <= targetTime
+        );
+
+        let lastTimestamp = currentData.elapsedTime;
+        for (let i = 0; i < events.length && !currentData.winner; ++i) {
+          const event = events[i];
+          const elapsedTime = event.timestamp - lastTimestamp;
+
+          if (elapsedTime > 0) {
+            currentData = processTimePassing(elapsedTime, currentData);
+          }
+          currentData = processRealTimeEvent(event, currentData);
+
+          lastTimestamp = event.timestamp;
+        }
+
+        return { ...currentData };
+      });
+    }, intervalTimeSecs * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  function renderPlayerView(playerId: string) {
+    const playerData = activityData.playerData[playerId];
+
+    const shotsInPercentage = toPercentageFixed2(
+      playerData.shots.in / (playerData.shots.in + playerData.shots.out)
+    );
 
     return (
       <>
         {/* Campo de juego */}
         <SectionTitle>Posición en el campo</SectionTitle>
-        <CourtView blueTeam={[playerPos]} />
+        <CourtView blueTeam={[playerData.locations[playerData.locations.length - 1]]} />
 
         {/* Estadísticas do xogador */}
         <div className="grid grid-cols-2 gap-4">
           <StatCard
-            value={secondsToTimeString(playerData.turno.tiempoActual)}
+            value={secondsToTimeString(
+              Object.keys(playerData.time.playingPosition).reduce(
+                (sum, position) => (sum += playerData.time.playingPosition[position]),
+                0
+              )
+            )}
             label="TIEMPO TOTAL DE TURNO"
           />
           <StatCard
-            value={playerData.turno.totalEnPosicionActual}
+            value={playerData.turns.playingPosition[playerData.currentPlayingPosition]}
             label="TURNOS EN POSICIÓN ACTUAL"
           />
           <StatCard
-            value={`${lanzamientosExitososPorcentaje}%`}
+            value={`${shotsInPercentage}%`}
             label="LANZAMIENTOS EXITOSOS"
-            progress={lanzamientosExitososPorcentaje}
+            progress={shotsInPercentage}
             progressColor="blue"
           />
-          <StatCard value={playerData.lanzamientos.fallos} label="TIROS FUERA" />
-          <StatCard value={playerRanking.points} label="GOLES" />
-          <StatCard value={playerData.rachaDeAciertos} label="RACHA DE GOLES" />
-          <StatCard value={`${playerData.distanciaTiro.media}m`} label="DISTANCIA MEDIA DE TIRO" />
-          <StatCard value={`${playerData.distanciaTiro.actual}m`} label="DISTANCIA ACTUAL" />
+          <StatCard value={playerData.shots.out} label="TIROS FUERA" />
+          <StatCard value={playerData.shots.in} label="GOLES" />
+          <StatCard value={playerData.shots.streak} label="RACHA DE GOLES" />
+          {playerData.shots.distances.length > 0 ? (
+            <>
+              <StatCard
+                value={`${toFixed2(playerData.shots.distances.reduce((sum, d) => (sum += d), 0) / playerData.shots.distances.length)}m`}
+                label="DISTANCIA MEDIA DE TIRO"
+              />
+              <StatCard
+                value={`${toFixed2(playerData.shots.distances[playerData.shots.distances.length - 1])}m`}
+                label="DISTANCIA DE ÚLTIMO TIRO"
+              />
+            </>
+          ) : (
+            <>
+              <StatCard value="N/D" label="DISTANCIA MEDIA DE TIRO" />
+              <StatCard value="N/D" label="DISTANCIA DE ÚLTIMO TIRO" />
+            </>
+          )}
         </div>
       </>
     );
   }
 
   function renderGlobalView() {
-    const globalData = activityData[activityId!];
-    const currentPlayer = getUserById(globalData.turno.jugadorId);
+    const remainingTurnTimePercentage =
+      activityData.conditions.maxTurnTime != null
+        ? toPercentageFixed2(
+            (activityData.conditions.maxTurnTime - activityData.turn.remainingTime!) /
+              activityData.conditions.maxTurnTime
+          )
+        : undefined;
 
     let lanzamientosTotales = 0;
     let lanzamientosExitosos = 0;
 
-    Object.values(activityPlayerData[activityId!]).forEach((p) => {
-      lanzamientosTotales += p.lanzamientos.aciertos + p.lanzamientos.fallos;
-      lanzamientosExitosos += p.lanzamientos.aciertos;
+    Object.values(activityData.playerData).forEach((playerData) => {
+      lanzamientosExitosos += playerData.shots.in;
+      lanzamientosTotales += playerData.shots.in + playerData.shots.out;
     });
 
-    const lanzamientosExitososPorcentaje = +(
-      (lanzamientosExitosos / lanzamientosTotales) *
-      100
-    ).toFixed(2);
+    const lanzamientosExitososPorcentaje = toPercentageFixed2(
+      lanzamientosExitosos / lanzamientosTotales
+    );
+
+    const playerRanking = calculateRanking(
+      Object.keys(activityData.playerData).map((playerId) => ({
+        userId: playerId,
+        points: activityData.playerData[playerId].shots.in,
+        payload: activityData.playerData[playerId].currentPlayingPosition,
+      }))
+    );
 
     return (
       <>
         {/* Campo de juego */}
         <SectionTitle>Posiciones de los jugadores</SectionTitle>
-        <CourtView blueTeam={Object.values(activityPlayerPositions[activityId!])} />
+        <CourtView
+          blueTeam={Object.values(activityData.playerData).map(
+            (playerData) => playerData.locations[playerData.locations.length - 1]
+          )}
+        />
 
         {/* Turno actual */}
         <SectionTitle>Turno actual</SectionTitle>
@@ -113,12 +219,15 @@ export default function ActivityData() {
               <ClockIcon className="size-4" />
             </ItemMedia>
 
-            <div className="text-base font-semibold">
-              {secondsToTimeString(globalData.tiempo)} restantes
-            </div>
+            {activityData.turn.remainingTime != null && (
+              <div className="text-base font-semibold">
+                {secondsToTimeString(activityData.turn.remainingTime)} restantes
+              </div>
+            )}
 
             <div className="flex gap-2 ml-auto">
-              <UserAvatar userId={currentPlayer.id} size={6} /> {currentPlayer.name}
+              <UserAvatar userId={activityData.turn.player} size={6} />{" "}
+              {getUserById(activityData.turn.player).name}
             </div>
           </ItemTitle>
         </Item>
@@ -126,9 +235,9 @@ export default function ActivityData() {
         {/* Cards Datos*/}
         <div className="grid grid-cols-2 gap-4">
           <StatCard
-            value={secondsToTimeString(globalData.tiempo)}
-            label="TIEMPO TOTAL"
-            progress={75}
+            value={secondsToTimeString(activityData.elapsedTime)}
+            label="TIEMPO TRANSCURRIDO"
+            progress={remainingTurnTimePercentage}
             progressColor="red"
           />
           <StatCard
@@ -142,13 +251,13 @@ export default function ActivityData() {
         {/* Ranking de xogadores */}
         <SectionTitle>Ranking</SectionTitle>
 
-        <RankingTable 
-        labels={{
-          value: "Goles",
-          subject: "Jugador",
-          extra: "Posición",
-        }}
-        rankings={activityRankings[activityId!]} 
+        <RankingTable
+          labels={{
+            value: "Goles",
+            subject: "Jugador",
+            extra: "Posición",
+          }}
+          rankings={playerRanking}
         />
       </>
     );
@@ -173,7 +282,7 @@ export default function ActivityData() {
               <DropdownMenuLabel className="text-sm italic font-medium text-muted-foreground">
                 Jugadores
               </DropdownMenuLabel>
-              {Object.keys(activityPlayerData[activityId!]).map((userId) => {
+              {activityData.conditions.participants.map((userId) => {
                 const user = getUserById(userId);
                 return (
                   <DropdownMenuItem key={userId} onClick={() => setSelectedPlayerId(userId)}>
@@ -187,7 +296,7 @@ export default function ActivityData() {
       </TopBar>
 
       {/* Renderizado condicional */}
-      {selectedPlayerData ? renderPlayerView(selectedPlayerData) : renderGlobalView()}
+      {selectedPlayerId ? renderPlayerView(selectedPlayerId) : renderGlobalView()}
     </>
   );
 }
@@ -199,8 +308,8 @@ interface CourtViewProps {
 
 function CourtView(props: CourtViewProps) {
   const fieldSize: Position = { x: 740, y: 443 };
+  const playingFieldSize: Position = { x: 634, y: 401 };
   const playingFieldStart: Position = { x: 53, y: 22 };
-  // const playingFieldSize: Position = { x: 634, y: 401 };
 
   return (
     <div className="w-full relative border rounded-lg shadow-sm overflow-hidden">
@@ -209,8 +318,8 @@ function CourtView(props: CourtViewProps) {
         {props.blueTeam?.map((p, i) => (
           <circle
             key={i}
-            cx={p.x + playingFieldStart.x}
-            cy={p.y + playingFieldStart.y}
+            cx={(p.x * playingFieldSize.x) / 100 + playingFieldStart.x}
+            cy={(p.y * playingFieldSize.y) / 100 + playingFieldStart.y}
             r="12"
             className="fill-blue-500 stroke-2 stroke-white"
           />
@@ -218,8 +327,8 @@ function CourtView(props: CourtViewProps) {
         {props.redTeam?.map((p, i) => (
           <circle
             key={i}
-            cx={p.x + playingFieldStart.x}
-            cy={p.y + playingFieldStart.y}
+            cx={(p.x * playingFieldSize.x) / 100 + playingFieldStart.x}
+            cy={(p.y * playingFieldSize.y) / 100 + playingFieldStart.y}
             r="12"
             className="fill-red-500 stroke-2 stroke-white"
           />

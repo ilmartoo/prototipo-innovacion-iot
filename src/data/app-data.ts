@@ -1,18 +1,21 @@
-import alba from "@/assets/alba.webp";
-import barbara from "@/assets/barbara.webp";
-import juan from "@/assets/juan.webp";
-import paulina from "@/assets/paulina.webp";
-import samuel from "@/assets/samuel.webp";
 import giannis from "@/assets/giannis_antetokoumpo.webp";
-import lebron from "@/assets/lebron_james.webp";
 import james from "@/assets/james_harden.webp";
+import lebron from "@/assets/lebron_james.webp";
 import luka from "@/assets/luka_doncic.webp";
+import alba from "@/assets/profile-pictures/alba.webp";
+import barbara from "@/assets/profile-pictures/barbara.webp";
+import juan from "@/assets/profile-pictures/juan.webp";
+import paulina from "@/assets/profile-pictures/paulina.png";
+import samuel from "@/assets/profile-pictures/samuel.webp";
 import ricky from "@/assets/ricky_rubio.webp";
-import type { Activity, ActivityData, ActivityPlayerData } from "@/data/models/activity";
-import type { ActivityRanking } from "@/data/models/activity-ranking";
-import { calculateRanking } from "@/data/models/activity-ranking";
-import type { Position } from "@/data/models/position";
+import type { Activity } from "@/data/models/activity";
 import type { User } from "@/data/models/user";
+
+export const sportsList = [
+  { value: "handball", label: "Balonmano" },
+  { value: "basketball", label: "Baloncesto" },
+  { value: "volleyball", label: "Voleibol" },
+];
 
 const dateNow = new Date();
 
@@ -126,7 +129,7 @@ export const users: User[] = [
     completedActivities: 6,
     birthDate: "22 de Agosto del 1990",
   },
-    {
+  {
     id: "U-0007",
     name: "Ricky",
     surname: "Rubio",
@@ -144,7 +147,7 @@ export const users: User[] = [
     completedActivities: 3,
     birthDate: "22 de Agosto del 1990",
   },
-    {
+  {
     id: "U-0009",
     name: "Lebron",
     surname: "James",
@@ -250,7 +253,7 @@ export const activities: Activity[] = [
 ];
 
 export const activityParticipants: Record<Activity["id"], User["id"][]> = {
-  "A-0000": ["U-0000", ...generateTemporalUserIds(4)],
+  "A-0000": ["U-0000", "U-0001", "U-0002", "U-0003", "U-0004"],
   "A-0001": ["U-0000", "U-0001", ...generateTemporalUserIds(5)],
   "A-0002": ["U-0002", ...generateTemporalUserIds(10)],
   "A-0003": ["U-0003", ...generateTemporalUserIds(1)],
@@ -273,238 +276,3 @@ export function addUserToActivity(userId: string, activityId: string): void {
 export function removeUserFromActivity(userId: string, activityId: string): void {
   activityParticipants[activityId] = activityParticipants[activityId].filter((id) => id !== userId);
 }
-
-export const activityRankings: Record<string, Record<string, ActivityRanking<string>>> = {
-  "A-0000": calculateRanking([
-    {
-      id: "R-0000",
-      userId: "U-0000",
-      points: 4,
-      payload: "Extremo D",
-    },
-    {
-      id: "R-0001",
-      userId: "U-0001",
-      points: 3,
-      payload: "Lateral I",
-    },
-    {
-      id: "R-0002",
-      userId: "U-0002",
-      points: 2,
-      payload: "Lateral D",
-    },
-    {
-      id: "R-0003",
-      userId: "U-0003",
-      points: 6,
-      payload: "Extremo I",
-    },
-    {
-      id: "R-0004",
-      userId: "U-0004",
-      points: 1,
-      payload: "Central",
-    },
-  ]),
-  "A-0001": calculateRanking([
-    {
-      id: "R-1000",
-      userId: "U-0004",
-      points: 7,
-      payload: "Ganador",
-    },
-    {
-      id: "R-1001",
-      userId: "U-0000",
-      points: 6,
-      payload: "Penalti",
-    },
-    {
-      id: "R-1002",
-      userId: "U-0003",
-      points: 4,
-      payload: "Extremo De.",
-    },
-    {
-      id: "R-1003",
-      userId: "U-0001",
-      points: 3,
-      payload: "Central",
-    },
-  ]),
-};
-
-export const activityPlayerPositions: Record<string, Record<string, Position>> = {
-  "A-0000": {
-    "U-0000": { x: 169, y: 120 },
-    "U-0001": { x: 254, y: 80 },
-    "U-0002": { x: 211, y: 241 },
-    "U-0003": { x: 148, y: 321 },
-    "U-0004": { x: 464, y: 160 },
-  },
-  "A-0001": {
-    "U-0000": { x: 200, y: 150 },
-    "U-0001": { x: 320, y: 200 },
-    "U-0003": { x: 180, y: 280 },
-    "U-0004": { x: 400, y: 180 },
-  },
-};
-
-export const activityData: Record<string, ActivityData> = {
-  "A-0000": {
-    tiempo: 823,
-    turno: {
-      jugadorId: "U-0004",
-      tiempoRestante: 13,
-    },
-  },
-};
-
-export const activityPlayerData: Record<string, Record<string, ActivityPlayerData>> = {
-  "A-0000": {
-    "U-0000": {
-      turno: {
-        tiempoActual: 65,
-        totalEnPosicionActual: 2,
-      },
-      lanzamientos: {
-        aciertos: 4,
-        fallos: 2,
-      },
-      rachaDeAciertos: 2,
-      distanciaTiro: {
-        media: 6.44,
-        actual: 7.22,
-      },
-    },
-    "U-0001": {
-      turno: {
-        tiempoActual: 56,
-        totalEnPosicionActual: 1,
-      },
-      lanzamientos: {
-        aciertos: 3,
-        fallos: 3,
-      },
-      rachaDeAciertos: 1,
-      distanciaTiro: {
-        media: 7.01,
-        actual: 6.92,
-      },
-    },
-    "U-0002": {
-      turno: {
-        tiempoActual: 82,
-        totalEnPosicionActual: 3,
-      },
-      lanzamientos: {
-        aciertos: 2,
-        fallos: 4,
-      },
-      rachaDeAciertos: 0,
-      distanciaTiro: {
-        media: 6.23,
-        actual: 6.45,
-      },
-    },
-    "U-0003": {
-      turno: {
-        tiempoActual: 49,
-        totalEnPosicionActual: 1,
-      },
-      lanzamientos: {
-        aciertos: 6,
-        fallos: 0,
-      },
-      rachaDeAciertos: 2,
-      distanciaTiro: {
-        media: 6.42,
-        actual: 6.58,
-      },
-    },
-    "U-0004": {
-      turno: {
-        tiempoActual: 96,
-        totalEnPosicionActual: 4,
-      },
-      lanzamientos: {
-        aciertos: 1,
-        fallos: 5,
-      },
-      rachaDeAciertos: 0,
-      distanciaTiro: {
-        media: 6.67,
-        actual: 6.22,
-      },
-    },
-  },
-  "A-0001": {
-    "U-0000": {
-      turno: {
-        tiempoActual: 78,
-        totalEnPosicionActual: 3,
-      },
-      lanzamientos: {
-        aciertos: 6,
-        fallos: 1,
-      },
-      rachaDeAciertos: 3,
-      distanciaTiro: {
-        media: 6.2,
-        actual: 6.8,
-      },
-    },
-    "U-0001": {
-      turno: {
-        tiempoActual: 45,
-        totalEnPosicionActual: 2,
-      },
-      lanzamientos: {
-        aciertos: 3,
-        fallos: 2,
-      },
-      rachaDeAciertos: 1,
-      distanciaTiro: {
-        media: 6.5,
-        actual: 6.3,
-      },
-    },
-    "U-0003": {
-      turno: {
-        tiempoActual: 68,
-        totalEnPosicionActual: 2,
-      },
-      lanzamientos: {
-        aciertos: 4,
-        fallos: 1,
-      },
-      rachaDeAciertos: 2,
-      distanciaTiro: {
-        media: 6.7,
-        actual: 6.9,
-      },
-    },
-    "U-0004": {
-      turno: {
-        tiempoActual: 92,
-        totalEnPosicionActual: 4,
-      },
-      lanzamientos: {
-        aciertos: 7,
-        fallos: 0,
-      },
-      rachaDeAciertos: 5,
-      distanciaTiro: {
-        media: 6.1,
-        actual: 5.8,
-      },
-    },
-  },
-};
-
-export const sportsList = [
-  { value: "handball", label: "Balonmano" },
-  { value: "basketball", label: "Baloncesto" },
-  { value: "volleyball", label: "Voleibol" },
-];
