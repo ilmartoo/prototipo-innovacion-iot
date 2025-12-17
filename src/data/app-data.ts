@@ -1,13 +1,13 @@
-import alba from "@/assets/alba.webp";
-import barbara from "@/assets/barbara.webp";
-import giannis from "@/assets/giannis_antetokoumpo.webp";
-import james from "@/assets/james_harden.webp";
-import juan from "@/assets/juan.webp";
-import lebron from "@/assets/lebron_james.webp";
-import luka from "@/assets/luka_doncic.webp";
-import paulina from "@/assets/paulina.webp";
-import ricky from "@/assets/ricky_rubio.webp";
-import samuel from "@/assets/samuel.webp";
+import alba from "@/assets/profile-pictures/alba.webp";
+import barbara from "@/assets/profile-pictures/barbara.webp";
+import giannis from "@/assets/profile-pictures/giannis_antetokoumpo.webp";
+import james from "@/assets/profile-pictures/james_harden.webp";
+import juan from "@/assets/profile-pictures/juan.webp";
+import lebron from "@/assets/profile-pictures/lebron_james.webp";
+import luka from "@/assets/profile-pictures/luka_doncic.webp";
+import paulina from "@/assets/profile-pictures/paulina.webp";
+import ricky from "@/assets/profile-pictures/ricky_rubio.webp";
+import samuel from "@/assets/profile-pictures/samuel.webp";
 import type { Activity } from "@/data/models/activity";
 import type { User } from "@/data/models/user";
 
@@ -275,4 +275,18 @@ export function addUserToActivity(userId: string, activityId: string): void {
 
 export function removeUserFromActivity(userId: string, activityId: string): void {
   activityParticipants[activityId] = activityParticipants[activityId].filter((id) => id !== userId);
+}
+
+export function secondsToTimeString(seconds: number): string {
+  const min = Math.trunc(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return min > 0 ? `${min}m ${s}s` : `${s}s`;
+}
+
+export function toFixed2(value: number): number {
+  return +value.toFixed(2);
+}
+
+export function toPercentageFixed2(value: number): number {
+  return toFixed2(value * 100);
 }
