@@ -1,8 +1,13 @@
 import alba from "@/assets/alba.webp";
 import barbara from "@/assets/barbara.webp";
 import juan from "@/assets/juan.webp";
-import paulina from "@/assets/paulina.png";
+import paulina from "@/assets/paulina.webp";
 import samuel from "@/assets/samuel.webp";
+import giannis from "@/assets/giannis_antetokoumpo.webp";
+import lebron from "@/assets/lebron_james.webp";
+import james from "@/assets/james_harden.webp";
+import luka from "@/assets/luka_doncic.webp";
+import ricky from "@/assets/ricky_rubio.webp";
 import type { Activity, ActivityData, ActivityPlayerData } from "@/data/models/activity";
 import type { ActivityRanking } from "@/data/models/activity-ranking";
 import { calculateRanking } from "@/data/models/activity-ranking";
@@ -101,6 +106,51 @@ export const users: User[] = [
     picture: samuel,
     level: 24,
     completedActivities: 2,
+    birthDate: "22 de Agosto del 1990",
+  },
+  {
+    id: "U-0005",
+    name: "James",
+    surname: "Harden",
+    picture: james,
+    level: 23,
+    completedActivities: 18,
+    birthDate: "22 de Agosto del 1990",
+  },
+  {
+    id: "U-0006",
+    name: "Luka",
+    surname: "Dončić",
+    picture: luka,
+    level: 13,
+    completedActivities: 6,
+    birthDate: "22 de Agosto del 1990",
+  },
+    {
+    id: "U-0007",
+    name: "Ricky",
+    surname: "Rubio",
+    picture: ricky,
+    level: 15,
+    completedActivities: 22,
+    birthDate: "22 de Agosto del 1990",
+  },
+  {
+    id: "U-0008",
+    name: "Giannis",
+    surname: "Antetokoumpo",
+    picture: giannis,
+    level: 4,
+    completedActivities: 3,
+    birthDate: "22 de Agosto del 1990",
+  },
+    {
+    id: "U-0009",
+    name: "Lebron",
+    surname: "James",
+    picture: lebron,
+    level: 80,
+    completedActivities: 150,
     birthDate: "22 de Agosto del 1990",
   },
 ];

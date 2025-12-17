@@ -10,57 +10,114 @@ import {
 import UserAvatar from "@/components/ui/UserAvatar";
 import { getUserById } from "@/data/app-data";
 import type { ActivityRanking } from "@/data/models/activity-ranking";
+import type { ReactNode } from "react";
 
 interface RankingTableProps {
   rankings: Record<string, ActivityRanking<string>>;
-  showRank?: boolean;
   className?: string;
+
+  /**
+   * simple → Jugador | Valor
+   * full   → Valor | Jugador | Extra
+   */
+  layout?: "simple" | "full";
+
+  labels?: {
+    value?: string;
+    subject?: string;
+    extra?: string;
+  };
+
+  renderExtra?: (payload: string) => ReactNode;
 }
 
 export default function RankingTable({
   rankings,
-  showRank = false,
   className,
+  layout = "full",
+  labels = {},
+  renderExtra,
 }: RankingTableProps) {
+  const headerValue = labels.value ?? "Valor";
+  const headerSubject = labels.subject ?? "Jugador";
+  const headerExtra = labels.extra ?? "Extra";
+
   return (
     <Card className={className}>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              {showRank && <TableHead className="text-center font-semibold">Rango</TableHead>}
-              <TableHead className="text-center font-semibold">Goles</TableHead>
-              <TableHead className="font-semibold">Jugador</TableHead>
-              <TableHead className="text-right font-semibold">Posición</TableHead>
+              {layout === "full" && (
+                <TableHead className="text-center font-semibold">
+                  {headerValue}
+                </TableHead>
+              )}
+
+              <TableHead className="font-semibold">
+                {headerSubject}
+              </TableHead>
+
+              {layout === "full" && (
+                <TableHead className="text-right font-semibold">
+                  {headerExtra}
+                </TableHead>
+              )}
+
+              {layout === "simple" && (
+                <TableHead className="text-right font-semibold">
+                  {headerValue}
+                </TableHead>
+              )}
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {Object.values(rankings)
               .sort((a, b) => a.rank - b.rank)
-              .map((ranking) => (
-                <TableRow key={ranking.id}>
-                  {showRank && (
-                    <TableCell className="text-center font-semibold">
-                      #{ranking.rank}
+              .map((ranking) => {
+                const user = getUserById(ranking.userId);
+
+                return (
+                  <TableRow
+                    key={ranking.id}
+                    className="hover:bg-muted/40 rounded-lg"
+                  >
+                    {/* VALOR (solo en layout full) */}
+                    {layout === "full" && (
+                      <TableCell className="text-center font-semibold">
+                        {ranking.points}
+                      </TableCell>
+                    )}
+
+                    {/* JUGADOR (siempre) */}
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <UserAvatar userId={ranking.userId} size={8} />
+                        <span className="font-medium">
+                          {user.name} {user.surname.charAt(0)}.
+                        </span>
+                      </div>
                     </TableCell>
-                  )}
-                  <TableCell className="text-center font-semibold text-lg">
-                    {ranking.points}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <UserAvatar userId={ranking.userId} size={8} />
-                      <span className="font-medium">
-                        {getUserById(ranking.userId).name}{" "}
-                        {getUserById(ranking.userId).surname.charAt(0)}.
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">
-                    {ranking.payload}
-                  </TableCell>
-                </TableRow>
-              ))}
+
+                    {/* EXTRA (solo en layout full) */}
+                    {layout === "full" && (
+                      <TableCell className="text-right text-muted-foreground">
+                        {renderExtra
+                          ? renderExtra(ranking.payload)
+                          : ranking.payload}
+                      </TableCell>
+                    )}
+
+                    {/* VALOR (layout simple, a la derecha) */}
+                    {layout === "simple" && (
+                      <TableCell className="text-right font-semibold text-lg">
+                        {ranking.points}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </CardContent>

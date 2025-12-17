@@ -4,11 +4,11 @@ import { currentUser } from "@/data/app-data";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
-import medal100bn from "@/assets/medals/100_activities_bn.png";
-import medal10 from "@/assets/medals/10_activities.png";
-import medal50 from "@/assets/medals/50_activities.png";
-import racha10_bn from "@/assets/medals/racha_10_bn.png";
-import racha5 from "@/assets/medals/racha_5.png";
+import medal100bn from "@/assets/medals/100_activities_bn.webp";
+import medal10 from "@/assets/medals/10_activities.webp";
+import medal50 from "@/assets/medals/50_activities.webp";
+import racha10_bn from "@/assets/medals/racha_10_bn.webp";
+import racha5 from "@/assets/medals/racha_5.webp";
 import SectionTitle from "@/components/ui/SectionTitle";
 import StatCard from "@/components/ui/StatCard";
 import { activitiesToNextLevel } from "@/data/models/user";
