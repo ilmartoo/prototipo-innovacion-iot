@@ -1,5 +1,4 @@
 export interface ActivityRanking<T> {
-  id: string;
   userId: string;
   points: number;
   rank: number;
