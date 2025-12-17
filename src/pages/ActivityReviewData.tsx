@@ -253,7 +253,14 @@ export default function ActivityReviewData() {
           />
         </div>
 
-        <RankingTable rankings={activityRankings[activityId!]} />
+        <RankingTable 
+          labels={{
+          value: "Goles",
+          subject: "Jugador",
+          extra: "Posición",
+        }}
+        rankings={activityRankings[activityId!]} 
+        />
       </>
     );
   }

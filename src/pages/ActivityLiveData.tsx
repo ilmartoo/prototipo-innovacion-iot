@@ -253,7 +253,14 @@ export default function ActivityData() {
         {/* Ranking de xogadores */}
         <SectionTitle>Ranking</SectionTitle>
 
-        <RankingTable rankings={playerRanking} />
+        <RankingTable
+          labels={{
+            value: "Goles",
+            subject: "Jugador",
+            extra: "Posición",
+          }}
+          rankings={playerRanking}
+        />
       </>
     );
   }
