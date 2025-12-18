@@ -50,16 +50,21 @@ export interface ActivityPlayerData {
   currentPlayingPosition: string;
   locations: Position[];
   time: {
+    total: number;
     playingPosition: Record<string, number>;
   };
   turns: {
+    total: number;
     playingPosition: Record<string, number>;
   };
   shots: {
     in: number;
+    goalkeeper: number;
     out: number;
-    streak: number;
-    positions: Position[];
+    total: number;
+    playingPosition: Record<string, { in: number; goalkeeper: number; out: number }>;
+    streak: { current: number; best: number };
+    locations: Position[];
     distances: number[];
   };
 }
