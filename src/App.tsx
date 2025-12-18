@@ -1,4 +1,5 @@
 import Layout from "@/Layout";
+import ActivityDetail from "@/pages/ActivityDetail";
 import ActivityLiveData from "@/pages/ActivityLiveData";
 import CreateActivity from "@/pages/CreateActivity";
 import Home from "@/pages/Home";
@@ -16,7 +17,8 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="activity/:activity">
           <Route path="live" element={<ActivityLiveData />} />
-          <Route path="review" element={<ActivityReviewData />} />
+          <Route path="summary" element={<ActivityReviewData />} />
+          <Route path="detail" element={<ActivityDetail />} />
         </Route>
         <Route path="create-activity" element={<CreateActivity />} />
         <Route path="my-activities" element={<MyActivities />} />

@@ -22,14 +22,7 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import { getUserById } from "../data/app-data";
 
-function secondsToTimeString(seconds: number): string {
-  const min = +(seconds / 60).toFixed(0);
-  const s = seconds % 60;
-
-  return min > 0 ? `${min}m ${s}s` : `${s}s`;
-}
-
-export default function ActivityReviewData() {
+export default function ActivitySummaryData() {
   const { activity: activityId } = useParams();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const [isLanzamientosOpen, setIsLanzamientosOpen] = useState(true);
@@ -65,9 +58,7 @@ export default function ActivityReviewData() {
           <StatCard value={`${playerData.distanciaTiro.media}m`} label="DISTANCIA MEDIA DE TIRO" />
         </div>
 
-        {/* Análisis de lanzamientos */}
         <div className="space-y-4">
-          {/* Collapsible principal */}
           <Collapsible
             open={isLanzamientosOpen}
             onOpenChange={setIsLanzamientosOpen}
@@ -135,7 +126,6 @@ export default function ActivityReviewData() {
                 </CollapsibleContent>
               </Collapsible>
 
-              {/* Lateral derecho - Colapsado */}
               <Collapsible open={isLateralOpen} onOpenChange={setIsLateralOpen}>
                 <CollapsibleTrigger asChild>
                   <Card className="cursor-pointer">
