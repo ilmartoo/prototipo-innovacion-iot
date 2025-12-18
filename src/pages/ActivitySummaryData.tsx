@@ -4,23 +4,13 @@ import handballGoalPostImage from "@/assets/fields/handball-goal-post.webp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import RankingTable from "@/components/ui/RankingTable";
 import SectionTitle from "@/components/ui/SectionTitle";
 import StatCard from "@/components/ui/StatCard";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
-import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
   activityParticipants,
-  getUserById,
   secondsToTimeString,
   toFixed2,
   toPercentageFixed2,
@@ -33,7 +23,6 @@ import { processExistingRealTimeData, type RealTimeEvent } from "@/data/models/r
 import type { User } from "@/data/models/user";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { useParams } from "react-router";
 
 const activityRealTimeEvents = (activityReportJSON as RealTimeEvent[]).sort(
   (a, b) => a.timestamp - b.timestamp
@@ -52,14 +41,15 @@ function TableItem(props: CollapsibleItemProps) {
     </TableRow>
   );
 }
+interface ActivitySummaryDataProps {
+  activityId: string;
+  player?: User;
+}
 
-export default function ActivitySummaryData() {
-  const { activity: activityId } = useParams();
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
-
+export default function ActivitySummaryData(props: ActivitySummaryDataProps) {
   const activityReport = processExistingRealTimeData(
     {
-      participants: activityParticipants[activityId!],
+      participants: activityParticipants[props.activityId],
       playingPositions: [
         "Extremo I",
         "Lateral I",
@@ -156,8 +146,8 @@ export default function ActivitySummaryData() {
     }
   }
 
-  function renderPlayerView(playerId: string) {
-    const playerData = activityReport.data.players[playerId];
+  function renderPlayerView(player: User) {
+    const playerData = activityReport.data.players[player.id];
 
     return (
       <>
@@ -459,38 +449,8 @@ export default function ActivitySummaryData() {
 
   return (
     <>
-      <TopBar title="Datos de actividad" to="/">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-32 justify-between text-sm">
-              {selectedPlayerId ? getUserById(selectedPlayerId).name : "Global"}
-              <ChevronDownIcon className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-fit">
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => setSelectedPlayerId("")}>Global</DropdownMenuItem>
-            </DropdownMenuGroup>
-
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-sm italic font-medium text-muted-foreground">
-                Jugadores
-              </DropdownMenuLabel>
-              {activityReport.conditions.participants.map((userId) => {
-                const user = getUserById(userId);
-                return (
-                  <DropdownMenuItem key={userId} onClick={() => setSelectedPlayerId(userId)}>
-                    {user.name} {user.surname}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TopBar>
-
       {/* Renderizado condicional */}
-      {selectedPlayerId ? renderPlayerView(selectedPlayerId) : renderGlobalView()}
+      {props.player ? renderPlayerView(props.player) : renderGlobalView()}
     </>
   );
 }

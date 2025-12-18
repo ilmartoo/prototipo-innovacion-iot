@@ -1,20 +1,10 @@
 import activityReportJSON from "@/assets/activity-data/A-0000.json";
 import handballFieldImage from "@/assets/fields/handball-field.webp";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Item, ItemMedia, ItemTitle } from "@/components/ui/item";
 import RankingTable from "@/components/ui/RankingTable";
 import SectionTitle from "@/components/ui/SectionTitle";
 import StatCard from "@/components/ui/StatCard";
-import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
   activityParticipants,
@@ -32,25 +22,26 @@ import {
   processTimePassing,
   type RealTimeEvent,
 } from "@/data/models/real-time";
-import { ChevronDown, ClockIcon } from "lucide-react";
+import type { User } from "@/data/models/user";
+import { ClockIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
 
 const activityRealTimeEvents = (activityReportJSON as RealTimeEvent[]).sort(
   (a, b) => a.timestamp - b.timestamp
 );
 
-export default function ActivityLiveData() {
-  const { activity: activityId } = useParams();
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
-  const navigate = useNavigate();
+interface ActivityLiveDataProps {
+  activityId: string;
+  player?: User;
+}
 
+export default function ActivityLiveData(props: ActivityLiveDataProps) {
   let realTimeDataIndex = Math.round((2 * activityRealTimeEvents.length) / 4);
 
   const [activityReport, setActivityReport] = useState(
     processExistingRealTimeData(
       {
-        participants: activityParticipants[activityId!],
+        participants: activityParticipants[props.activityId],
         playingPositions: [
           "Extremo I",
           "Lateral I",
@@ -112,7 +103,6 @@ export default function ActivityLiveData() {
 
         if (currentReport.winning.player) {
           clearInterval(intervalId);
-          navigate(`/activity/${activityId}/summary`);
         }
 
         return currentReport;
@@ -122,10 +112,8 @@ export default function ActivityLiveData() {
     return () => clearInterval(intervalId);
   }, []);
 
-  function renderPlayerView(playerId: string) {
-    const player = getUserById(playerId);
-
-    const playerData = activityReport.data.players[playerId];
+  function renderPlayerView(player: User) {
+    const playerData = activityReport.data.players[player.id];
 
     const shotsInPercentage = toPercentageFixed2(playerData.shots.in / playerData.shots.total);
 
@@ -282,38 +270,8 @@ export default function ActivityLiveData() {
 
   return (
     <>
-      <TopBar title="Datos de actividad" to="/">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-32 justify-between text-sm">
-              {selectedPlayerId ? getUserById(selectedPlayerId).name : "Global"}
-              <ChevronDown className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-fit">
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => setSelectedPlayerId("")}>Global</DropdownMenuItem>
-            </DropdownMenuGroup>
-
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-sm italic font-medium text-muted-foreground">
-                Jugadores
-              </DropdownMenuLabel>
-              {activityReport.conditions.participants.map((userId) => {
-                const user = getUserById(userId);
-                return (
-                  <DropdownMenuItem key={userId} onClick={() => setSelectedPlayerId(userId)}>
-                    {user.name} {user.surname}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TopBar>
-
       {/* Renderizado condicional */}
-      {selectedPlayerId ? renderPlayerView(selectedPlayerId) : renderGlobalView()}
+      {props.player ? renderPlayerView(props.player) : renderGlobalView()}
     </>
   );
 }

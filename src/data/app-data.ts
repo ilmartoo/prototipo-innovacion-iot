@@ -252,6 +252,10 @@ export const activities: Activity[] = [
   },
 ];
 
+export function getActivityById(activityId: string): Activity {
+  return activities.find((u) => u.id === activityId)!;
+}
+
 export const activityParticipants: Record<Activity["id"], User["id"][]> = {
   "A-0000": ["U-0000", "U-0001", "U-0002", "U-0003", "U-0004"],
   "A-0001": ["U-0000", "U-0001", ...generateTemporalUserIds(5)],
