@@ -112,7 +112,7 @@ export default function ActivityLiveData() {
 
         if (currentReport.winning.player) {
           clearInterval(intervalId);
-          navigate(`/activity/${activityId}/review`);
+          navigate(`/activity/${activityId}/summary`);
         }
 
         return currentReport;

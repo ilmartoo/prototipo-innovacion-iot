@@ -53,7 +53,7 @@ function TableItem(props: CollapsibleItemProps) {
   );
 }
 
-export default function ActivityReviewData() {
+export default function ActivitySummaryData() {
   const { activity: activityId } = useParams();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
 
