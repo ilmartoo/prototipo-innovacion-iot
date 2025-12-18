@@ -22,24 +22,28 @@ export interface ActivityConditions {
   locations: {
     goalPost: Position;
   };
-  winnerCheck: (playerId: string, data: ActivityData) => boolean;
 }
 
 export function getActivityTime(date: Date): string {
   return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 }
 
-export interface ActivityData {
+export interface ActivityReport {
   conditions: ActivityConditions;
-  winner?: string;
-  elapsedTime: number;
-  turn: {
-    player: string;
-    inPossesion: boolean;
-    possesionTime: number;
-    remainingTime?: number;
+  winning: {
+    player?: string;
+    check: (player: string, report: ActivityReport) => boolean;
   };
-  playerData: Record<string, ActivityPlayerData>;
+  data: {
+    elapsedTime: number;
+    turn: {
+      player: string;
+      inPossesion: boolean;
+      possesionTime: number;
+      remainingTime?: number;
+    };
+    players: Record<string, ActivityPlayerData>;
+  };
 }
 
 export interface ActivityPlayerData {

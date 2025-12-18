@@ -1,4 +1,4 @@
-import activityDataJSON from "@/assets/activity-data/A-0000.json";
+import activityReportJSON from "@/assets/activity-data/A-0000.json";
 import handballFieldImage from "@/assets/fields/handball-field.webp";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +15,14 @@ import SectionTitle from "@/components/ui/SectionTitle";
 import StatCard from "@/components/ui/StatCard";
 import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
-import { activityParticipants, getUserById } from "@/data/app-data";
-import type { ActivityData } from "@/data/models/activity";
+import {
+  activityParticipants,
+  getUserById,
+  secondsToTimeString,
+  toFixed2,
+  toPercentageFixed2,
+} from "@/data/app-data";
+import type { ActivityReport } from "@/data/models/activity";
 import { calculateRanking } from "@/data/models/activity-ranking";
 import type { Position } from "@/data/models/position";
 import {
@@ -29,31 +35,17 @@ import { ChevronDown, ClockIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
-const activityRealTimeEvents = (activityDataJSON as RealTimeEvent[]).sort(
+const activityRealTimeEvents = (activityReportJSON as RealTimeEvent[]).sort(
   (a, b) => a.timestamp - b.timestamp
 );
 
-function secondsToTimeString(seconds: number): string {
-  const min = Math.trunc(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return min > 0 ? `${min}m ${s}s` : `${s}s`;
-}
-
-function toFixed2(value: number): number {
-  return +value.toFixed(2);
-}
-
-function toPercentageFixed2(value: number): number {
-  return toFixed2(value * 100);
-}
-
-export default function ActivityData() {
+export default function ActivityLiveData() {
   const { activity: activityId } = useParams();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
 
   let realTimeDataIndex = Math.round((3 * activityRealTimeEvents.length) / 4);
 
-  const [activityData, setActivityData] = useState(
+  const [activityReport, setActivityReport] = useState(
     processExistingRealTimeData(
       {
         participants: activityParticipants[activityId!],
@@ -74,9 +66,9 @@ export default function ActivityData() {
         locations: {
           goalPost: { x: 100, y: 50 },
         },
-        winnerCheck: (playerId: string, data: ActivityData) => {
-          return data.playerData[playerId].shots.in >= 7;
-        },
+      },
+      (playerId: string, report: ActivityReport) => {
+        return report.data.players[playerId].shots.in >= 7;
       },
       activityRealTimeEvents,
       activityRealTimeEvents[realTimeDataIndex].timestamp
@@ -84,38 +76,47 @@ export default function ActivityData() {
   );
 
   useEffect(() => {
-    const intervalTimeSecs = 0.3;
+    const intervalTimeSecs = 0.2;
     const intervalId = setInterval(() => {
-      setActivityData((currentData) => {
-        const targetTime = currentData.elapsedTime + intervalTimeSecs;
+      setActivityReport((prevReport) => {
+        const currentReport = {
+          conditions: prevReport.conditions,
+          winning: { ...prevReport.winning },
+          data: structuredClone(prevReport.data),
+        };
+
+        const targetTime = currentReport.data.elapsedTime + intervalTimeSecs;
         const events = activityRealTimeEvents.filter(
-          (e) => e.timestamp > currentData.elapsedTime && e.timestamp <= targetTime
+          (e) => e.timestamp > currentReport.data.elapsedTime && e.timestamp <= targetTime
         );
 
-        let lastTimestamp = currentData.elapsedTime;
-        for (let i = 0; i < events.length && !currentData.winner; ++i) {
+        let lastTimestamp = currentReport.data.elapsedTime;
+        for (let i = 0; i < events.length && !currentReport.winning.player; ++i) {
           const event = events[i];
           const elapsedTime = event.timestamp - lastTimestamp;
 
           if (elapsedTime > 0) {
-            currentData = processTimePassing(elapsedTime, currentData);
+            processTimePassing(elapsedTime, currentReport);
           }
-          currentData = processRealTimeEvent(event, currentData);
+          processRealTimeEvent(event, currentReport);
 
           lastTimestamp = event.timestamp;
         }
 
-        return { ...currentData };
+        const remainingTimeToTarget = targetTime - lastTimestamp;
+        if (remainingTimeToTarget > 0) {
+          processTimePassing(remainingTimeToTarget, currentReport);
+        }
+
+        return currentReport;
       });
     }, intervalTimeSecs * 1000);
 
     return () => clearInterval(intervalId);
   }, []);
 
-  console.log(activityData);
-
   function renderPlayerView(playerId: string) {
-    const playerData = activityData.playerData[playerId];
+    const playerData = activityReport.data.players[playerId];
 
     const shotsInPercentage = toPercentageFixed2(
       playerData.shots.in / (playerData.shots.in + playerData.shots.out)
@@ -175,17 +176,17 @@ export default function ActivityData() {
 
   function renderGlobalView() {
     const remainingTurnTimePercentage =
-      activityData.conditions.maxTurnTime != null
+      activityReport.conditions.maxTurnTime != null
         ? toPercentageFixed2(
-            (activityData.conditions.maxTurnTime - activityData.turn.remainingTime!) /
-              activityData.conditions.maxTurnTime
+            (activityReport.conditions.maxTurnTime - activityReport.data.turn.remainingTime!) /
+              activityReport.conditions.maxTurnTime
           )
         : undefined;
 
     let lanzamientosTotales = 0;
     let lanzamientosExitosos = 0;
 
-    Object.values(activityData.playerData).forEach((playerData) => {
+    Object.values(activityReport.data.players).forEach((playerData) => {
       lanzamientosExitosos += playerData.shots.in;
       lanzamientosTotales += playerData.shots.in + playerData.shots.out;
     });
@@ -195,10 +196,10 @@ export default function ActivityData() {
     );
 
     const playerRanking = calculateRanking(
-      Object.keys(activityData.playerData).map((playerId) => ({
+      Object.keys(activityReport.data.players).map((playerId) => ({
         userId: playerId,
-        points: activityData.playerData[playerId].shots.in,
-        payload: activityData.playerData[playerId].currentPlayingPosition,
+        points: activityReport.data.players[playerId].shots.in,
+        payload: activityReport.data.players[playerId].currentPlayingPosition,
       }))
     );
 
@@ -207,7 +208,7 @@ export default function ActivityData() {
         {/* Campo de juego */}
         <SectionTitle>Posiciones de los jugadores</SectionTitle>
         <CourtView
-          blueTeam={Object.values(activityData.playerData).map(
+          blueTeam={Object.values(activityReport.data.players).map(
             (playerData) => playerData.locations[playerData.locations.length - 1]
           )}
         />
@@ -221,15 +222,15 @@ export default function ActivityData() {
               <ClockIcon className="size-4" />
             </ItemMedia>
 
-            {activityData.turn.remainingTime != null && (
+            {activityReport.data.turn.remainingTime != null && (
               <div className="text-base font-semibold">
-                {secondsToTimeString(activityData.turn.remainingTime)} restantes
+                {secondsToTimeString(activityReport.data.turn.remainingTime)} restantes
               </div>
             )}
 
             <div className="flex gap-2 ml-auto">
-              <UserAvatar userId={activityData.turn.player} size={6} />{" "}
-              {getUserById(activityData.turn.player).name}
+              <UserAvatar userId={activityReport.data.turn.player} size={6} />{" "}
+              {getUserById(activityReport.data.turn.player).name}
             </div>
           </ItemTitle>
         </Item>
@@ -237,7 +238,7 @@ export default function ActivityData() {
         {/* Cards Datos*/}
         <div className="grid grid-cols-2 gap-4">
           <StatCard
-            value={secondsToTimeString(activityData.elapsedTime)}
+            value={secondsToTimeString(activityReport.data.elapsedTime)}
             label="TIEMPO TRANSCURRIDO"
             progress={remainingTurnTimePercentage}
             progressColor="red"
@@ -284,7 +285,7 @@ export default function ActivityData() {
               <DropdownMenuLabel className="text-sm italic font-medium text-muted-foreground">
                 Jugadores
               </DropdownMenuLabel>
-              {activityData.conditions.participants.map((userId) => {
+              {activityReport.conditions.participants.map((userId) => {
                 const user = getUserById(userId);
                 return (
                   <DropdownMenuItem key={userId} onClick={() => setSelectedPlayerId(userId)}>

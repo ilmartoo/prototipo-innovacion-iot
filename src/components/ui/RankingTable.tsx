@@ -49,25 +49,17 @@ export default function RankingTable({
           <TableHeader>
             <TableRow>
               {layout === "full" && (
-                <TableHead className="text-center font-semibold">
-                  {headerValue}
-                </TableHead>
+                <TableHead className="text-center font-semibold">{headerValue}</TableHead>
               )}
 
-              <TableHead className="font-semibold">
-                {headerSubject}
-              </TableHead>
+              <TableHead className="font-semibold">{headerSubject}</TableHead>
 
               {layout === "full" && (
-                <TableHead className="text-right font-semibold">
-                  {headerExtra}
-                </TableHead>
+                <TableHead className="text-right font-semibold">{headerExtra}</TableHead>
               )}
 
               {layout === "simple" && (
-                <TableHead className="text-right font-semibold">
-                  {headerValue}
-                </TableHead>
+                <TableHead className="text-right font-semibold">{headerValue}</TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -79,15 +71,10 @@ export default function RankingTable({
                 const user = getUserById(ranking.userId);
 
                 return (
-                  <TableRow
-                    key={ranking.id}
-                    className="hover:bg-muted/40 rounded-lg"
-                  >
+                  <TableRow key={ranking.userId} className="hover:bg-muted/40 rounded-lg">
                     {/* VALOR (solo en layout full) */}
                     {layout === "full" && (
-                      <TableCell className="text-center font-semibold">
-                        {ranking.points}
-                      </TableCell>
+                      <TableCell className="text-center font-semibold">{ranking.points}</TableCell>
                     )}
 
                     {/* JUGADOR (siempre) */}
@@ -103,9 +90,7 @@ export default function RankingTable({
                     {/* EXTRA (solo en layout full) */}
                     {layout === "full" && (
                       <TableCell className="text-right text-muted-foreground">
-                        {renderExtra
-                          ? renderExtra(ranking.payload)
-                          : ranking.payload}
+                        {renderExtra ? renderExtra(ranking.payload) : ranking.payload}
                       </TableCell>
                     )}
 
