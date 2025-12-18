@@ -1,14 +1,13 @@
 import Layout from "@/Layout";
 import ActivityDetail from "@/pages/ActivityDetail";
 import ActivityLiveData from "@/pages/ActivityLiveData";
+import ActivityReviewData from "@/pages/ActivityReviewData";
 import CreateActivity from "@/pages/CreateActivity";
 import Home from "@/pages/Home";
 import MyActivities from "@/pages/MyActivities";
 import MyProfile from "@/pages/MyProfile";
 import Rankings from "@/pages/Rankings";
 import { Route, Routes } from "react-router";
-
-import ActivityReviewData from "./pages/ActivityReviewData";
 
 export default function App() {
   return (

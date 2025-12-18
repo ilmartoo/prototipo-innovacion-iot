@@ -1,6 +1,7 @@
 import activityReportJSON from "@/assets/activity-data/A-0000.json";
 import handballFieldImage from "@/assets/fields/handball-field.webp";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +34,7 @@ import {
 } from "@/data/models/real-time";
 import { ChevronDown, ClockIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const activityRealTimeEvents = (activityReportJSON as RealTimeEvent[]).sort(
   (a, b) => a.timestamp - b.timestamp
@@ -42,8 +43,9 @@ const activityRealTimeEvents = (activityReportJSON as RealTimeEvent[]).sort(
 export default function ActivityLiveData() {
   const { activity: activityId } = useParams();
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+  const navigate = useNavigate();
 
-  let realTimeDataIndex = Math.round((3 * activityRealTimeEvents.length) / 4);
+  let realTimeDataIndex = Math.round((2 * activityRealTimeEvents.length) / 4);
 
   const [activityReport, setActivityReport] = useState(
     processExistingRealTimeData(
@@ -108,6 +110,11 @@ export default function ActivityLiveData() {
           processTimePassing(remainingTimeToTarget, currentReport);
         }
 
+        if (currentReport.winning.player) {
+          clearInterval(intervalId);
+          navigate(`/activity/${activityId}/review`);
+        }
+
         return currentReport;
       });
     }, intervalTimeSecs * 1000);
@@ -116,16 +123,19 @@ export default function ActivityLiveData() {
   }, []);
 
   function renderPlayerView(playerId: string) {
+    const player = getUserById(playerId);
+
     const playerData = activityReport.data.players[playerId];
 
-    const shotsInPercentage = toPercentageFixed2(
-      playerData.shots.in / (playerData.shots.in + playerData.shots.out)
-    );
+    const shotsInPercentage = toPercentageFixed2(playerData.shots.in / playerData.shots.total);
 
     return (
       <>
         {/* Campo de juego */}
-        <SectionTitle>Posición en el campo</SectionTitle>
+        <SectionTitle
+          title="Posicionamiento del jugador"
+          subtitle={`Posición en el campo de ${player.name} ${player.surname}.`}
+        />
         <CourtView blueTeam={[playerData.locations[playerData.locations.length - 1]]} />
 
         {/* Estadísticas do xogador */}
@@ -149,9 +159,11 @@ export default function ActivityLiveData() {
             progress={shotsInPercentage}
             progressColor="blue"
           />
-          <StatCard value={playerData.shots.out} label="TIROS FUERA" />
-          <StatCard value={playerData.shots.in} label="GOLES" />
-          <StatCard value={playerData.shots.streak} label="RACHA DE GOLES" />
+          <StatCard value={playerData.shots.goalkeeper} label="LANZAMIENTOS AL PORTERO" />
+          <StatCard value={playerData.shots.out} label="LANZAMIENTOS POR FUERA" />
+          <StatCard value={playerData.shots.in} label="GOLES ANOTADOS" />
+          <StatCard value={playerData.shots.streak.current} label="RACHA DE GOLES ACTUAL" />
+          <StatCard value={playerData.shots.streak.best} label="MEJOR RACHA DE GOLES" />
           {playerData.shots.distances.length > 0 ? (
             <>
               <StatCard
@@ -206,7 +218,10 @@ export default function ActivityLiveData() {
     return (
       <>
         {/* Campo de juego */}
-        <SectionTitle>Posiciones de los jugadores</SectionTitle>
+        <SectionTitle
+          title="Posicionamiento de los jugadores"
+          subtitle="Posición en el campo de los jugadores."
+        />
         <CourtView
           blueTeam={Object.values(activityReport.data.players).map(
             (playerData) => playerData.locations[playerData.locations.length - 1]
@@ -214,8 +229,7 @@ export default function ActivityLiveData() {
         />
 
         {/* Turno actual */}
-        <SectionTitle>Turno actual</SectionTitle>
-
+        <SectionTitle title="Turno actual" subtitle="Información sobre el turno actual." />
         <Item variant="outline" className="shadow-sm flex flex-row items-center justify-between">
           <ItemTitle className="w-full">
             <ItemMedia>
@@ -236,6 +250,7 @@ export default function ActivityLiveData() {
         </Item>
 
         {/* Cards Datos*/}
+        <SectionTitle title="Estadísticas" />
         <div className="grid grid-cols-2 gap-4">
           <StatCard
             value={secondsToTimeString(activityReport.data.elapsedTime)}
@@ -252,8 +267,7 @@ export default function ActivityLiveData() {
         </div>
 
         {/* Ranking de xogadores */}
-        <SectionTitle>Ranking</SectionTitle>
-
+        <SectionTitle title="Ranking de jugadores" />
         <RankingTable
           labels={{
             value: "Goles",
@@ -315,28 +329,36 @@ function CourtView(props: CourtViewProps) {
   const playingFieldStart: Position = { x: 53, y: 22 };
 
   return (
-    <div className="w-full relative border rounded-lg shadow-sm overflow-hidden">
-      <img src={handballFieldImage} alt="Playing field background" className="w-full" />
-      <svg viewBox={`0 0 ${fieldSize.x} ${fieldSize.y}`} className="absolute top-0 w-full">
-        {props.blueTeam?.map((p, i) => (
-          <circle
-            key={i}
-            cx={(p.x * playingFieldSize.x) / 100 + playingFieldStart.x}
-            cy={(p.y * playingFieldSize.y) / 100 + playingFieldStart.y}
-            r="12"
-            className="fill-blue-500 stroke-2 stroke-white"
+    <Card className="p-2">
+      <CardContent className="p-0">
+        <div className="w-full relative border rounded-lg shadow-sm overflow-hidden">
+          <img
+            src={handballFieldImage}
+            alt="Playing field background"
+            className="w-full grayscale"
           />
-        ))}
-        {props.redTeam?.map((p, i) => (
-          <circle
-            key={i}
-            cx={(p.x * playingFieldSize.x) / 100 + playingFieldStart.x}
-            cy={(p.y * playingFieldSize.y) / 100 + playingFieldStart.y}
-            r="12"
-            className="fill-red-500 stroke-2 stroke-white"
-          />
-        ))}
-      </svg>
-    </div>
+          <svg viewBox={`0 0 ${fieldSize.x} ${fieldSize.y}`} className="absolute top-0 w-full">
+            {props.blueTeam?.map((p, i) => (
+              <circle
+                key={i}
+                cx={(p.x * playingFieldSize.x) / 100 + playingFieldStart.x}
+                cy={(p.y * playingFieldSize.y) / 100 + playingFieldStart.y}
+                r="12"
+                className="fill-blue-500 stroke-2 stroke-white"
+              />
+            ))}
+            {props.redTeam?.map((p, i) => (
+              <circle
+                key={i}
+                cx={(p.x * playingFieldSize.x) / 100 + playingFieldStart.x}
+                cy={(p.y * playingFieldSize.y) / 100 + playingFieldStart.y}
+                r="12"
+                className="fill-red-500 stroke-2 stroke-white"
+              />
+            ))}
+          </svg>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
