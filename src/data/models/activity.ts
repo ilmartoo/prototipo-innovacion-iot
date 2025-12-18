@@ -62,9 +62,92 @@ export interface ActivityPlayerData {
     goalkeeper: number;
     out: number;
     total: number;
-    playingPosition: Record<string, { in: number; goalkeeper: number; out: number }>;
+    playingPosition: Record<string, { in: number; goalkeeper: number; out: number; total: number }>;
     streak: { current: number; best: number };
     locations: Position[];
     distances: number[];
   };
+}
+
+export function aggregatePayerData(report: ActivityReport): ActivityPlayerData {
+  const playerAgg: ActivityPlayerData = {
+    currentPlayingPosition: "",
+    locations: [],
+    time: {
+      total: 0,
+      playingPosition: report.conditions.playingPositions.reduce(
+        (map, position) => ({ ...map, [position]: 0 }),
+        {}
+      ),
+    },
+    turns: {
+      total: 0,
+      playingPosition: report.conditions.playingPositions.reduce(
+        (map, position) => ({
+          ...map,
+          [position]: 0,
+        }),
+        {}
+      ),
+    },
+    shots: {
+      in: 0,
+      goalkeeper: 0,
+      out: 0,
+      total: 0,
+      playingPosition: report.conditions.playingPositions.reduce(
+        (map, position) => ({
+          ...map,
+          [position]: {
+            in: 0,
+            goalkeeper: 0,
+            out: 0,
+            total: 0,
+          },
+        }),
+        {}
+      ),
+      streak: { current: 0, best: 0 },
+      locations: [],
+      distances: [],
+    },
+  };
+
+  Object.values(report.data.players).forEach((playerData) => {
+    playerAgg.locations.push(...playerData.locations);
+    playerAgg.shots.locations.push(...playerData.shots.locations);
+    playerAgg.shots.distances.push(...playerData.shots.distances);
+
+    playerAgg.time.total += playerData.time.total;
+
+    playerAgg.turns.total += playerData.turns.total;
+
+    playerAgg.shots.in += playerData.shots.in;
+    playerAgg.shots.goalkeeper += playerData.shots.goalkeeper;
+    playerAgg.shots.out += playerData.shots.out;
+    playerAgg.shots.total += playerData.shots.total;
+
+    if (playerAgg.shots.streak.best < playerData.shots.streak.best) {
+      playerAgg.shots.streak.best = playerData.shots.streak.best;
+    }
+
+    for (const playingPosition of report.conditions.playingPositions) {
+      playerAgg.time.playingPosition[playingPosition] +=
+        playerData.time.playingPosition[playingPosition];
+
+      playerAgg.turns.playingPosition[playingPosition] +=
+        playerData.turns.playingPosition[playingPosition];
+
+      playerAgg.shots.playingPosition[playingPosition].in +=
+        playerData.shots.playingPosition[playingPosition].in;
+      playerAgg.shots.playingPosition[playingPosition].goalkeeper +=
+        playerData.shots.playingPosition[playingPosition].goalkeeper;
+      playerAgg.shots.playingPosition[playingPosition].out +=
+        playerData.shots.playingPosition[playingPosition].out;
+      playerAgg.shots.playingPosition[playingPosition].total +=
+        playerData.shots.playingPosition[playingPosition].total;
+    }
+  });
+
+  return playerAgg;
 }

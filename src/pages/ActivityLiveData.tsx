@@ -220,7 +220,7 @@ export default function ActivityLiveData() {
         {/* Campo de juego */}
         <SectionTitle
           title="Posicionamiento de los jugadores"
-          subtitle="Posición en el campo de los jugadores."
+          subtitle="Posición en el campo de los jugadores"
         />
         <CourtView
           blueTeam={Object.values(activityReport.data.players).map(
@@ -229,7 +229,7 @@ export default function ActivityLiveData() {
         />
 
         {/* Turno actual */}
-        <SectionTitle title="Turno actual" subtitle="Información sobre el turno actual." />
+        <SectionTitle title="Turno actual" subtitle="Información sobre el turno actual" />
         <Item variant="outline" className="shadow-sm flex flex-row items-center justify-between">
           <ItemTitle className="w-full">
             <ItemMedia>

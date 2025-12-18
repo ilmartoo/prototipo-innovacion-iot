@@ -12,10 +12,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Item, ItemActions, ItemContent, ItemGroup, ItemTitle } from "@/components/ui/item";
 import RankingTable from "@/components/ui/RankingTable";
 import SectionTitle from "@/components/ui/SectionTitle";
 import StatCard from "@/components/ui/StatCard";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
 import TopBar from "@/components/ui/TopBar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
@@ -24,11 +24,13 @@ import {
   secondsToTimeString,
   toFixed2,
   toPercentageFixed2,
+  users,
 } from "@/data/app-data";
-import type { ActivityReport } from "@/data/models/activity";
+import { aggregatePayerData, type ActivityReport } from "@/data/models/activity";
 import { calculateRanking } from "@/data/models/activity-ranking";
 import type { Position } from "@/data/models/position";
 import { processExistingRealTimeData, type RealTimeEvent } from "@/data/models/real-time";
+import type { User } from "@/data/models/user";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useParams } from "react-router";
@@ -42,16 +44,12 @@ interface CollapsibleItemProps {
   value: ReactNode;
 }
 
-function CollapsibleItem(props: CollapsibleItemProps) {
+function TableItem(props: CollapsibleItemProps) {
   return (
-    <Item>
-      <ItemContent>
-        <ItemTitle>{props.title}</ItemTitle>
-      </ItemContent>
-      <ItemActions>
-        <span className="font-semibold">{props.value}</span>
-      </ItemActions>
-    </Item>
+    <TableRow>
+      <TableCell className="font-semibold">{props.title}</TableCell>
+      <TableCell className="text-right">{props.value}</TableCell>
+    </TableRow>
   );
 }
 
@@ -94,7 +92,12 @@ export default function ActivityReviewData() {
     )
   );
 
-  const ganador = activityReport.winning.player && getUserById(activityReport.winning.player);
+  const activityUsers = users.reduce(
+    (map, user) => ({ ...map, [user.id]: user }),
+    {} as Record<string, User>
+  );
+
+  const winnerUser = activityReport.winning.player && activityUsers[activityReport.winning.player];
 
   // Tiros de jugadores
   const playerShots = Object.keys(activityReport.data.players).map((player) => {
@@ -160,7 +163,7 @@ export default function ActivityReviewData() {
       <>
         <SectionTitle
           title="Posicionamiento en el campo"
-          subtitle="Movimiento por el campo del jugador a lo largo de la actividad."
+          subtitle="Movimiento por el campo del jugador a lo largo de la actividad"
         />
         <CourtHeatmapView locations={playerData.locations} />
 
@@ -173,7 +176,7 @@ export default function ActivityReviewData() {
         <SectionTitle title="Estadísticas" />
         <div className="grid grid-cols-2 gap-4">
           <StatCard
-            value={`${secondsToTimeString(playerData.time.total / playerData.turns.total)}/tiro`}
+            value={secondsToTimeString(playerData.time.total / playerData.turns.total)}
             label="TIEMPO MEDIO POR LANZAMIENTO"
           />
           <StatCard
@@ -218,99 +221,102 @@ export default function ActivityReviewData() {
 
         {/* Análisis de lanzamientos */}
         <SectionTitle title="Análisis de lanzamientos" />
-        <div className="space-y-4">
-          <Collapsible
-            open={isLanzamientosOpen}
-            onOpenChange={setIsLanzamientosOpen}
-            className="w-full"
-          >
-            <CollapsibleTrigger asChild>
-              <Card className="cursor-pointer">
-                <CardContent className="flex items-center justify-between p-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">Lanzamientos</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Analiza los lanzamientos desde posiciones
-                    </p>
-                  </div>
-                  {isLanzamientosOpen ? (
-                    <ChevronUpIcon className="size-4" />
-                  ) : (
-                    <ChevronDownIcon className="size-4" />
-                  )}
-                </CardContent>
-              </Card>
-            </CollapsibleTrigger>
+        {/* Collapsible principal */}
+        <Card>
+          <CardContent className="px-2">
+            <Collapsible open={isLanzamientosOpen} onOpenChange={setIsLanzamientosOpen}>
+              <CollapsibleTrigger className="flex flex-row justify-between items-center w-full px-4">
+                <div className="text-left">
+                  <h3 className="font-semibold">Lanzamientos</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Analisis desde las distintas posiciones
+                  </p>
+                </div>
+                <Button variant="ghost" size="icon-sm" asChild>
+                  {isLanzamientosOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                </Button>
+              </CollapsibleTrigger>
 
-            <CollapsibleContent className="mt-2 space-y-2">
-              {Object.entries(isPositionCollapsibleOpen).map(([position, isOpen]) => (
-                <Collapsible
-                  key={position}
-                  open={isOpen}
-                  onOpenChange={() =>
-                    setIsPositionCollapsibleOpen({
-                      ...isPositionCollapsibleOpen,
-                      [position]: !isOpen,
-                    })
-                  }
-                >
-                  <CollapsibleTrigger asChild>
-                    <Card className="cursor-pointer">
-                      <CardContent className="flex items-center justify-between p-4">
-                        <span className="text-lg font-medium">{position}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg font-semibold">
-                            {playerData.turns.playingPosition[position]}
-                          </span>
-                          {isOpen ? (
-                            <ChevronUpIcon className="size-4" />
-                          ) : (
-                            <ChevronDownIcon className="size-4" />
-                          )}
-                        </div>
+              <CollapsibleContent className="mt-2 space-y-2">
+                {Object.entries(isPositionCollapsibleOpen).map(([position, isOpen]) => (
+                  <Collapsible
+                    key={position}
+                    open={isOpen}
+                    onOpenChange={() =>
+                      setIsPositionCollapsibleOpen({
+                        ...isPositionCollapsibleOpen,
+                        [position]: !isOpen,
+                      })
+                    }
+                  >
+                    <Card className="border-none shadow-none bg-muted py-2">
+                      <CardContent className="px-4">
+                        <CollapsibleTrigger className="flex flex-row justify-between items-center w-full">
+                          <div className="text-left">
+                            <h3 className="font-semibold">{position}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {playerData.turns.playingPosition[position]} turno(s)
+                            </p>
+                          </div>{" "}
+                          <Button variant="ghost" size="icon-sm" asChild>
+                            {isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                          </Button>
+                        </CollapsibleTrigger>
+
+                        <CollapsibleContent className="mt-2">
+                          <Table>
+                            <TableHeader>
+                              <TableRow></TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {/* Lanzamientos */}
+                              <TableItem
+                                title="Lanzamientos acertados"
+                                value={`${playerData.shots.playingPosition[position].in} ~ ${playerData.shots.playingPosition[position].total ? toPercentageFixed2(playerData.shots.playingPosition[position].in / playerData.shots.playingPosition[position].total) : 0}%`}
+                              />
+                              <TableItem
+                                title="Lanzamientos al portero"
+                                value={`${playerData.shots.playingPosition[position].goalkeeper} ~ ${playerData.shots.playingPosition[position].total ? toPercentageFixed2(playerData.shots.playingPosition[position].goalkeeper / playerData.shots.playingPosition[position].total) : 0}%`}
+                              />
+                              <TableItem
+                                title="Lanzamientos por fuera"
+                                value={`${playerData.shots.playingPosition[position].out} ~ ${playerData.shots.playingPosition[position].total ? toPercentageFixed2(playerData.shots.playingPosition[position].out / playerData.shots.playingPosition[position].total) : 0}%`}
+                              />
+                              {/* Tiempos */}
+                              <TableItem
+                                title="Tiempo en la posición"
+                                value={secondsToTimeString(
+                                  playerData.time.playingPosition[position]
+                                )}
+                              />
+                              <TableItem
+                                title="Tiempo medio por lanzamiento"
+                                value={
+                                  playerData.shots.playingPosition[position].total
+                                    ? secondsToTimeString(
+                                        playerData.time.playingPosition[position] /
+                                          playerData.shots.playingPosition[position].total
+                                      )
+                                    : "0s"
+                                }
+                              />
+                            </TableBody>
+                          </Table>
+                        </CollapsibleContent>
                       </CardContent>
                     </Card>
-                  </CollapsibleTrigger>
-
-                  <CollapsibleContent className="mt-2">
-                    <Card>
-                      <CardContent className="p-0">
-                        <ItemGroup>
-                          {/* Tiempos */}
-                          <CollapsibleItem
-                            title="Tiempo en la posición"
-                            value={secondsToTimeString(playerData.time.playingPosition[position])}
-                          />
-                          {/* Lanzamientos */}
-                          <CollapsibleItem
-                            title="Lanzamientos acertados"
-                            value={playerData.shots.playingPosition[position].in}
-                          />
-                          <CollapsibleItem
-                            title="Lanzamientos al portero"
-                            value={playerData.shots.playingPosition[position].goalkeeper}
-                          />
-                          <CollapsibleItem
-                            title="Lanzamientos por fuera"
-                            value={playerData.shots.playingPosition[position].out}
-                          />
-                        </ItemGroup>
-                      </CardContent>
-                    </Card>
-                  </CollapsibleContent>
-                </Collapsible>
-              ))}
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
+                  </Collapsible>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          </CardContent>
+        </Card>
       </>
     );
   }
 
   function renderGlobalView() {
-    const lanzamientos = Object.values(activityReport.data.players)
-      .map((playerData) => playerData.shots.locations)
-      .flat();
+    const playerAgg = aggregatePayerData(activityReport);
 
     const ranking = calculateRanking(
       Object.keys(activityReport.data.players).map((playerId) => ({
@@ -320,23 +326,22 @@ export default function ActivityReviewData() {
       }))
     );
 
-    const quickestPlayerUser = getUserById(quickestPlayer.player);
-    const bestPrecissionPlayerUser = getUserById(bestPrecissionPlayer.player);
-    const slowestPlayerUser = getUserById(slowestPlayer.player);
-    const worstPrecissionPlayerUser = getUserById(worstPrecissionPlayer.player);
-
     return (
       <>
-        {ganador && (
+        {winnerUser && (
           <>
             <SectionTitle
               title={
                 <>
-                  <UserAvatar className="inline-block align-bottom" userId={ganador.id} size={6} />{" "}
-                  {ganador.name} {ganador.surname} ha ganado
+                  <UserAvatar
+                    className="inline-block align-bottom"
+                    userId={winnerUser.id}
+                    size={6}
+                  />{" "}
+                  {winnerUser.name} {winnerUser.surname} ha ganado
                 </>
               }
-              subtitle={`Ha anotado un total de ${activityReport.data.players[ganador.id].shots.in} goles.`}
+              subtitle={`Ha anotado un total de ${activityReport.data.players[winnerUser.id].shots.in} goles.`}
             />
           </>
         )}
@@ -345,42 +350,96 @@ export default function ActivityReviewData() {
           title="Posicionamiento en el campo"
           subtitle="Movimiento por el campo de los jugadores a lo largo de la actividad."
         />
-        <CourtHeatmapView
-          locations={Object.values(activityReport.data.players)
-            .map((playerData) => playerData.locations)
-            .flat()}
-        />
+        <CourtHeatmapView locations={playerAgg.locations} />
 
         <SectionTitle
           title="Localización de lanzamientos"
-          subtitle={`De un total de ${lanzamientos.length} lanzamientos por parte de los jugadores.`}
+          subtitle={`De un total de ${playerAgg.shots.locations.length} lanzamientos a portería por parte de los jugadores.`}
         />
-        <GoalHeatmapView locations={lanzamientos} />
+        <GoalHeatmapView locations={playerAgg.shots.locations} />
 
-        <SectionTitle title="Estadísticas" />
+        <SectionTitle title="Estadísticas globales" />
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard
+            value={secondsToTimeString(playerAgg.time.total / playerAgg.turns.total)}
+            label="TIEMPO MEDIO POR LANZAMIENTO"
+          />
+          <StatCard
+            value={secondsToTimeString(playerAgg.time.total)}
+            label="TIEMPO TOTAL UTILIZADO"
+            progress={toPercentageFixed2(playerAgg.time.total / activityReport.data.elapsedTime)}
+            progressColor="blue"
+          />
+          <StatCard value={playerAgg.shots.in} label="GOLES ANOTADOS" />
+          <StatCard
+            value={playerAgg.shots.in}
+            label="LANZAMIENTOS EXITOSOS"
+            progress={
+              playerAgg.shots.total &&
+              toPercentageFixed2(playerAgg.shots.in / playerAgg.shots.total)
+            }
+            progressColor="blue"
+          />
+          <StatCard
+            value={playerAgg.shots.goalkeeper}
+            label="LANZAMIENTOS AL PORTERO"
+            progress={
+              playerAgg.shots.total &&
+              toPercentageFixed2(playerAgg.shots.goalkeeper / playerAgg.shots.total)
+            }
+            progressColor="red"
+          />
+          <StatCard
+            value={playerAgg.shots.out}
+            label="LANZAMIENTOS POR FUERA"
+            progress={
+              playerAgg.shots.total &&
+              toPercentageFixed2(playerAgg.shots.out / playerAgg.shots.total)
+            }
+            progressColor="red"
+          />
+          {playerAgg.shots.distances.length > 0 && (
+            <>
+              <StatCard
+                value={`${toFixed2(playerAgg.shots.distances.reduce((sum, d) => sum + d, 0) / playerAgg.shots.total)}m`}
+                label="DISTANCIA MEDIA DE TIRO"
+              />
+              <StatCard
+                value={`${toFixed2(Math.max(...playerAgg.shots.distances))}m`}
+                label="DISTANCIA MÁXIMA DE TIRO"
+              />
+              <StatCard
+                value={`${toFixed2(Math.min(...playerAgg.shots.distances))}m`}
+                label="DISTANCIA MÍNIMA DE TIRO"
+              />
+            </>
+          )}
+        </div>
+
+        <SectionTitle title="Estadísticas individuales" />
         <div className="grid grid-cols-2 gap-4">
           <StatCard
             value={`${secondsToTimeString(quickestPlayer.meanTurnTime)}/tiro`}
             label="LANZADOR MÁS RÁPIDO"
-            subtitle={`${quickestPlayerUser.name} ${quickestPlayerUser.surname}`}
+            subtitle={`${activityUsers[quickestPlayer.player].name} ${activityUsers[quickestPlayer.player].surname}`}
             className="text-center"
           />
           <StatCard
             value={`${bestPrecissionPlayer.acuracyPercentage}% acierto`}
             label="JUGADOR MÁS PRECISO"
-            subtitle={`${bestPrecissionPlayerUser.name} ${bestPrecissionPlayerUser.surname}`}
+            subtitle={`${activityUsers[bestPrecissionPlayer.player].name} ${activityUsers[bestPrecissionPlayer.player].surname}`}
             className="text-center"
           />
           <StatCard
             value={`${secondsToTimeString(slowestPlayer.meanTurnTime)}/tiro`}
             label="LANZADOR MÁS LENTO"
-            subtitle={`${slowestPlayerUser.name} ${slowestPlayerUser.surname}`}
+            subtitle={`${activityUsers[slowestPlayer.player].name} ${activityUsers[slowestPlayer.player].surname}`}
             className="text-center"
           />
           <StatCard
             value={`${worstPrecissionPlayer.acuracyPercentage}% acierto`}
             label="JUGADOR MENOS PRECISO"
-            subtitle={`${worstPrecissionPlayerUser.name} ${worstPrecissionPlayerUser.surname}`}
+            subtitle={`${activityUsers[worstPrecissionPlayer.player].name} ${activityUsers[worstPrecissionPlayer.player].surname}`}
             className="text-center"
           />
         </div>

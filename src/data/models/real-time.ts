@@ -112,6 +112,7 @@ export function processExistingRealTimeData(
                     in: 0,
                     goalkeeper: 0,
                     out: 0,
+                    total: 0,
                   },
                 }),
                 {}
@@ -202,6 +203,7 @@ export function processRealTimeEvent(event: RealTimeEvent, report: ActivityRepor
           const playerData = report.data.players[report.data.turn.player];
 
           playerData.shots.total += 1;
+          playerData.shots.playingPosition[playerData.currentPlayingPosition].total += 1;
 
           // Pelota dentro de la portería
           if (event.data.type === "in") {
