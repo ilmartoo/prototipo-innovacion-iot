@@ -42,11 +42,12 @@ export default function MyActivities() {
   );
 
   function navigateToActivity(activity: Activity): void {
-    if (activity.started && !activity.finished) {
+     if (activity.started && !activity.finished) {
       navigate(`/activity/${activity.id}/live`);
     } else {
       navigate(`/activity/${activity.id}/review`);
     }
+    //navigate(`/activity/${activity.id}/detail`);
   }
 
   return (

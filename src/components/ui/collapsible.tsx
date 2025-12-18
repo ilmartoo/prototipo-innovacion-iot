@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
 
 function Collapsible({ ...props }: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
@@ -17,3 +18,16 @@ function CollapsibleContent({
 }
 
 export { Collapsible, CollapsibleContent, CollapsibleTrigger };
+=======
+"use client"
+
+import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
+
+const Collapsible = CollapsiblePrimitive.Root
+
+const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger
+
+const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent
+
+export { Collapsible, CollapsibleTrigger, CollapsibleContent }
+>>>>>>> 2c599a5 (feat: create detail screen, with tabs to nv btw live and summary)

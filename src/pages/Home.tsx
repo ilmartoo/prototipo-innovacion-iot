@@ -50,8 +50,9 @@ export default function Home() {
     if (activity.started && !activity.finished) {
       navigate(`/activity/${activity.id}/live`);
     } else {
-      navigate(`/activity/${activity.id}/review`);
+      navigate(`/activity/${activity.id}/summary`);
     }
+    //navigate(`/activity/${activity.id}/detail`);
   }
 
   function toggleCurrentUserOnActivity(activity: Activity): void {
