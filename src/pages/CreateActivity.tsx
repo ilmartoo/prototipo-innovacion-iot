@@ -123,7 +123,7 @@ export default function CreateActivity() {
 
       {/* Crear */}
       <Button asChild>
-        <Link to={`/activity/${activities[0].id}/${startNow ? "live" : "summary"}`}>
+        <Link to={`/activity/${activities[0].id}`}>
           Crear actividad
         </Link>
       </Button>
