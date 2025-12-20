@@ -1,9 +1,9 @@
-import TopBar from "@/components/ui/TopBar";
-import { useState } from "react";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { SearchIcon } from "lucide-react";
 import RankingTable from "@/components/ui/RankingTable";
-import type { ActivityRanking } from "@/data/models/activity-ranking";
+import TopBar from "@/components/ui/TopBar";
+import { calculateRanking, type ActivityRankingPending } from "@/data/models/activity-ranking";
+import { SearchIcon } from "lucide-react";
+import { useState } from "react";
 
 export default function Rankings() {
   const [search, setSearch] = useState<string>("");
@@ -13,25 +13,25 @@ export default function Rankings() {
   const titleGlobal = "Global - Baloncesto - Puntos este año";
 
   // --- DATOS ---
-  const rankingsAmigos: Record<string, ActivityRanking<string>> = {
-    "1": { id: "1", userId: "U-0000", rank: 1, points: 26, payload: "" },
-    "2": { id: "2", userId: "U-0001", rank: 2, points: 20, payload: "" },
-    "3": { id: "3", userId: "U-0002", rank: 3, points: 17, payload: "" },
-    "4": { id: "4", userId: "U-0003", rank: 4, points: 11, payload: "" },
-    "5": { id: "5", userId: "U-0004", rank: 5, points: 4,  payload: "" },
-  };
+  const rankingsAmigos: ActivityRankingPending[] = [
+    { userId: "U-0000", points: 26, payload: null },
+    { userId: "U-0001", points: 20, payload: null },
+    { userId: "U-0002", points: 17, payload: null },
+    { userId: "U-0003", points: 11, payload: null },
+    { userId: "U-0004", points: 4, payload: null },
+  ];
 
-  const rankingsGlobal: Record<string, ActivityRanking<string>> = {
-    "10": { id: "10", userId: "U-0009", rank: 1, points: 341, payload: "" },
-    "11": { id: "11", userId: "U-0006", rank: 2, points: 298, payload: "" },
-    "12": { id: "12", userId: "U-0007", rank: 3, points: 269, payload: "" },
-    "13": { id: "13", userId: "U-0008", rank: 4, points: 247, payload: "" },
-    "14": { id: "14", userId: "U-0005", rank: 5, points: 178, payload: "" },
-  };
+  const rankingsGlobal: ActivityRankingPending[] = [
+    { userId: "U-0009", points: 341, payload: null },
+    { userId: "U-0006", points: 298, payload: null },
+    { userId: "U-0007", points: 269, payload: null },
+    { userId: "U-0008", points: 247, payload: null },
+    { userId: "U-0005", points: 178, payload: null },
+  ];
 
   const showAmigos = titleAmigos.toLowerCase().includes(search.toLowerCase());
   const showGlobal = titleGlobal.toLowerCase().includes(search.toLowerCase());
-  
+
   const noResults = !showAmigos && !showGlobal;
 
   return (
@@ -55,12 +55,10 @@ export default function Rankings() {
         {/* TABLA 1: Amigos */}
         {showAmigos && (
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground px-1">
-              {titleAmigos}
-            </h3>
+            <h3 className="text-sm font-semibold text-muted-foreground px-1">{titleAmigos}</h3>
 
             <RankingTable
-              rankings={rankingsAmigos}
+              rankings={calculateRanking(rankingsAmigos)}
               layout="simple"
               labels={{
                 subject: "Amigo",
@@ -73,24 +71,21 @@ export default function Rankings() {
         {/* TABLA 2: Global */}
         {showGlobal && (
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-muted-foreground px-1">
-              {titleGlobal}
-            </h3>
-          <RankingTable 
-            rankings={rankingsGlobal}
-            layout = "simple"
-            labels={{ subject: "Deportista", value: "Puntos" }}
-          />
+            <h3 className="text-sm font-semibold text-muted-foreground px-1">{titleGlobal}</h3>
+            <RankingTable
+              rankings={calculateRanking(rankingsGlobal)}
+              layout="simple"
+              labels={{ subject: "Deportista", value: "Puntos" }}
+            />
           </div>
         )}
 
         {/* Mensaje de "No encontrado"*/}
         {noResults && (
-            <div className="text-center text-gray-500 py-10">
-                No se encontraron rankings con ese nombre.
-            </div>
+          <div className="text-center text-gray-500 py-10">
+            No se encontraron rankings con ese nombre.
+          </div>
         )}
-
       </div>
     </div>
   );

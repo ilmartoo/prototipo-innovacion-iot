@@ -9,26 +9,23 @@ import {
 } from "@/components/ui/table";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { getUserById } from "@/data/app-data";
-import type { ActivityRanking } from "@/data/models/activity-ranking";
+import type { ActivityRanking, ActivityRankingPayload } from "@/data/models/activity-ranking";
 import type { ReactNode } from "react";
 
 interface RankingTableProps {
-  rankings: Record<string, ActivityRanking<string>>;
+  rankings: Record<string, ActivityRanking>;
   className?: string;
-
   /**
    * simple → Jugador | Valor
    * full   → Valor | Jugador | Extra
    */
   layout?: "simple" | "full";
-
   labels?: {
     value?: string;
     subject?: string;
     extra?: string;
   };
-
-  renderExtra?: (payload: string) => ReactNode;
+  renderExtra?: (payload: ActivityRankingPayload) => ReactNode;
 }
 
 export default function RankingTable({
@@ -90,7 +87,11 @@ export default function RankingTable({
                     {/* EXTRA (solo en layout full) */}
                     {layout === "full" && (
                       <TableCell className="text-right text-muted-foreground">
-                        {renderExtra ? renderExtra(ranking.payload) : ranking.payload}
+                        {renderExtra
+                          ? renderExtra(ranking.payload)
+                          : typeof ranking.payload === "object"
+                            ? JSON.stringify(ranking.payload)
+                            : ranking.payload}
                       </TableCell>
                     )}
 

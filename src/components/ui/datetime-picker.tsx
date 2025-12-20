@@ -12,17 +12,21 @@ import { cn } from "@/lib/utils";
 
 interface DateTimePicker24hProps {
   id?: string;
+  name?: string;
+  value?: Date;
+  onChange?: (value: Date | undefined) => void;
   disabled?: boolean;
 }
 
 export function DateTimePicker24h(props: DateTimePicker24hProps) {
-  const [date, setDate] = React.useState<Date>();
+  const [date, setDate] = React.useState<Date | undefined>(props.value);
   const [isOpen, setIsOpen] = React.useState(false);
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
       setDate(selectedDate);
+      props.onChange?.(date);
     }
   };
 
@@ -43,6 +47,7 @@ export function DateTimePicker24h(props: DateTimePicker24hProps) {
       <PopoverTrigger asChild>
         <Button
           id={props.id}
+          name={props.name}
           disabled={props.disabled}
           variant="outline"
           className={cn(

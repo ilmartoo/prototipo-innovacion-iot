@@ -80,7 +80,7 @@ export default function MyProfile() {
       />
 
       {/* --- MEDALLERO --- */}
-      <SectionTitle>Medallero</SectionTitle>
+      <SectionTitle title="Medallero" />
 
       {/* Grid de 2 columnas */}
       <div className="grid grid-cols-2 gap-4">
@@ -102,7 +102,7 @@ export default function MyProfile() {
       </div>
 
       {/* --- MEDALLAS EN PROCESO --- */}
-      <SectionTitle>Medallas en proceso</SectionTitle>
+      <SectionTitle title="Medallas en proceso" />
 
       <div className="grid grid-cols-2 gap-4">
         <MedalCard

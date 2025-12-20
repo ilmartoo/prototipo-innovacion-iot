@@ -13,16 +13,15 @@ import type { User } from "@/data/models/user";
 import { TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { useParams } from "react-router";
-import { activityParticipants, getActivityById, getUserById } from "../data/app-data";
+import { activityParticipants, defaultActivity, getUserById } from "../data/app-data";
 import ActivityLiveData from "./ActivityLiveData";
 import ActivitySummaryData from "./ActivitySummaryData";
 
 export default function ActivityDetail() {
-  const { activity: activityId } = useParams();
+  // const { activity: activityId } = useParams();
   const [selectedPlayer, setSelectedPlayer] = useState<User | undefined>();
 
-  const activity = getActivityById(activityId!);
+  const activity = defaultActivity;
 
   return (
     <>
@@ -77,12 +76,12 @@ export default function ActivityDetail() {
 
         {/* Summary tab */}
         <TabsContent value="summary">
-          <ActivitySummaryData activityId={activityId!} player={selectedPlayer} />
+          <ActivitySummaryData activityId={activity.id} player={selectedPlayer} />
         </TabsContent>
 
         {/* Live tab */}
         <TabsContent value="live">
-          <ActivityLiveData activityId={activityId!} player={selectedPlayer} />
+          <ActivityLiveData activityId={activity.id} player={selectedPlayer} />
         </TabsContent>
       </Tabs>
     </>

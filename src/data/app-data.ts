@@ -11,11 +11,17 @@ import samuel from "@/assets/profile-pictures/samuel.webp";
 import type { Activity } from "@/data/models/activity";
 import type { User } from "@/data/models/user";
 
-export const sportsList = [
-  { value: "handball", label: "Balonmano" },
-  { value: "basketball", label: "Baloncesto" },
-  { value: "volleyball", label: "Voleibol" },
-];
+export const sportList = {
+  Balonmano: "handball",
+  Baloncesto: "basketball",
+  Badminton: "badminton",
+} as const;
+
+export const userLevelList = {
+  Profesional: "professional",
+  Intermedio: "intermediate",
+  Amateur: "amateur",
+} as const;
 
 const dateNow = new Date();
 
@@ -251,6 +257,8 @@ export const activities: Activity[] = [
     finished: true,
   },
 ];
+
+export const defaultActivity = activities[0];
 
 export function getActivityById(activityId: string): Activity {
   return activities.find((u) => u.id === activityId)!;

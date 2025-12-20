@@ -1,15 +1,17 @@
-export interface ActivityRanking<T> {
+export type ActivityRankingPayload = string | number | boolean | object | undefined | null;
+
+export interface ActivityRanking {
   userId: string;
   points: number;
   rank: number;
-  payload: T;
+  payload: ActivityRankingPayload;
 }
 
-export type ActivityRankingPending<T> = Omit<ActivityRanking<T>, "rank">;
+export type ActivityRankingPending = Omit<ActivityRanking, "rank">;
 
-export function calculateRanking<T>(
-  rankings: ActivityRankingPending<T>[]
-): Record<string, ActivityRanking<T>> {
+export function calculateRanking(
+  rankings: ActivityRankingPending[]
+): Record<string, ActivityRanking> {
   return rankings
     .sort((a, b) => b.points - a.points)
     .reduce(

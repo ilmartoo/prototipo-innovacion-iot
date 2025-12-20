@@ -28,9 +28,9 @@ export default function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn("p-4 bg-gray-50 border-0", className)}>
+    <Card className={cn("p-4 border-0 bg-gray-50", className)}>
       <CardContent className="flex flex-col p-0 gap-2">
-        <div className="text-2xl font-bold text-gray-900">{value}</div>
+        <div className="text-xl font-bold">{value}</div>
 
         <div className="space-y-1">
           <div className="text-sm font-medium text-gray-600 tracking-wide">{label}</div>
