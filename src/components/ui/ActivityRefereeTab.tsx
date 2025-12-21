@@ -43,10 +43,10 @@ export default function ActivityRefereeTab(props: ActivityRefereeTabProps) {
         </ItemTitle>
       </Item>
 
-      <SectionTitle title="Información de arbitraje" />
+      <SectionTitle title="Información de arbitraje" subtitle="Información de arbitraje reciente" />
       <RefereeActions entries={entries.slice(0, 5)} participants={participants} />
 
-      <SectionTitle title="Histórico de arbitraje" />
+      <SectionTitle title="Registro de arbitraje" subtitle="Historial de arbitraje completo" />
       <RefereeLog entries={entries} participants={participants} />
     </>
   );

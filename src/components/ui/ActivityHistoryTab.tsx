@@ -17,7 +17,7 @@ export default function ActivityHistoryTab(props: ActivityRefereeTabProps) {
 
   return (
     <>
-      <SectionTitle title="Histórico de arbitraje" />
+      <SectionTitle title="Registro de arbitraje" subtitle="Historial de arbitraje completo" />
       <RefereeLog entries={entries} participants={participants} />
     </>
   );
