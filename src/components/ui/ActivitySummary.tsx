@@ -29,14 +29,14 @@ export default function ActivitySummary(props: ActivitySummaryProps) {
     if (props.isListing) {
       if (isUserInActivity(currentUser.id, props.activity.id)) {
         variant = "outline";
-        icon = <ClipboardCheckIcon className="size-5" />;
+        icon = <ClipboardCheckIcon className="size-5" strokeWidth={1.5} />;
       } else {
         variant = "default";
-        icon = <ClipboardPenIcon className="size-5" />;
+        icon = <ClipboardPenIcon className="size-5" strokeWidth={1.5} />;
       }
     } else {
       variant = "default";
-      icon = <ClipboardPasteIcon className="size-5" />;
+      icon = <ClipboardPasteIcon className="size-5" strokeWidth={1.5} />;
     }
 
     return (
@@ -57,14 +57,14 @@ export default function ActivitySummary(props: ActivitySummaryProps) {
         <ActivityDataRow>
           <ItemTitle className="line-clamp-1 text-base">{props.activity.title}</ItemTitle>
           <div className="flex items-center gap-0.5">
-            {props.activity.started ? (
+            {props.activity.started && !props.activity.finished ? (
               <>
-                <ClockAlertIcon strokeWidth="1" className="size-5" />{" "}
+                <ClockAlertIcon strokeWidth={1.5} className="size-5" />{" "}
                 <span className="font-semibold">En directo</span>
               </>
             ) : (
               <>
-                <Clock4Icon strokeWidth="1" className="size-5" />{" "}
+                <Clock4Icon strokeWidth={1.5} className="size-5" />{" "}
                 <span>{getActivityTime(props.activity.date)}</span>
               </>
             )}
@@ -78,7 +78,7 @@ export default function ActivitySummary(props: ActivitySummaryProps) {
             </span>
           </div>
           <div className="text-muted-foreground flex items-center gap-0.5">
-            <Users strokeWidth="1" className="size-5" />
+            <Users strokeWidth={1.5} className="size-5" />
             {activityParticipants[props.activity.id].length}/{props.activity.maxParticipants}
           </div>
         </ActivityDataRow>

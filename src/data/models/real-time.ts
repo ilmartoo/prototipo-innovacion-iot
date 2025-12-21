@@ -29,30 +29,70 @@ export type RealTimeEventPossesion = RealTimeEventBase<
   }
 >;
 
-export type RealTimeEventShotOut = RealTimeEventBase<
+export type RealTimeEventShot = RealTimeEventBase<
   "shot",
   {
     player: string;
-    type: "out";
+  } & ({ type: "out" } | { type: "in"; goal: boolean; x: number; y: number })
+>;
+
+export type RealTimeEvent = RealTimeEventPosition | RealTimeEventPossesion | RealTimeEventShot;
+
+export type RefeereEntryType = "turn" | "game-position" | "shot" | "foul" | "win";
+
+export interface RefeereEntryBase<T extends RefeereEntryType, D> {
+  type: T;
+  timestamp: number;
+  data: D;
+}
+
+export type RefeereEntryTurnChange = RefeereEntryBase<
+  "turn",
+  {
+    from?: string;
+    to: string;
   }
 >;
 
-export type RealTimeEventShotIn = RealTimeEventBase<
-  "shot",
+export type RefeereEntryGamePositionChange = RefeereEntryBase<
+  "game-position",
   {
     player: string;
-    type: "in";
-    goal: boolean;
-    x: number;
-    y: number;
+    from?: string;
+    to: string;
   }
 >;
 
-export type RealTimeEvent =
-  | RealTimeEventPosition
-  | RealTimeEventPossesion
-  | RealTimeEventShotOut
-  | RealTimeEventShotIn;
+export type RefeereEntryShot = RefeereEntryBase<
+  "shot",
+  {
+    type: "in" | "goalkeeper" | "out";
+    player: string;
+    distance: number;
+    gamePosition: string;
+  }
+>;
+
+export type RefeereEntryWin = RefeereEntryBase<
+  "win",
+  {
+    player: string;
+  }
+>;
+
+export type RefeereEntryFoul = RefeereEntryBase<
+  "foul",
+  {
+    player: string;
+  } & ({ type: "timeout" } | { type: "area"; distance: number } | { type: "shot-without-turn" })
+>;
+
+export type RefereeEntry =
+  | RefeereEntryTurnChange
+  | RefeereEntryGamePositionChange
+  | RefeereEntryShot
+  | RefeereEntryFoul
+  | RefeereEntryWin;
 
 export function processExistingRealTimeData(
   conditions: ActivityConditions,
@@ -65,6 +105,28 @@ export function processExistingRealTimeData(
     winning: {
       check: winCheck,
     },
+    referee: [
+      // Posiciones de los jugadores
+      ...conditions.participants.map(
+        (p) =>
+          ({
+            type: "game-position",
+            timestamp: 0,
+            data: {
+              player: p,
+              to: conditions.gamePositions[0],
+            },
+          }) as RefeereEntryGamePositionChange
+      ),
+      // Primer jugador con turno
+      {
+        type: "turn",
+        timestamp: 0,
+        data: {
+          to: conditions.participants[0],
+        },
+      } as RefeereEntryTurnChange,
+    ],
     data: {
       elapsedTime: 0,
       turn: {
@@ -77,23 +139,23 @@ export function processExistingRealTimeData(
         (map, playerId) => ({
           ...map,
           [playerId]: {
-            currentPlayingPosition: conditions.playingPositions[0],
+            currentPlayingPosition: conditions.gamePositions[0],
             locations: [],
             time: {
               total: 0,
-              playingPosition: conditions.playingPositions.reduce(
+              gamePosition: conditions.gamePositions.reduce(
                 (map, position) => ({ ...map, [position]: 0 }),
                 {}
               ),
             },
             turns: {
               total: 0,
-              playingPosition: conditions.playingPositions.reduce(
+              gamePosition: conditions.gamePositions.reduce(
                 (map, position) => ({
                   ...map,
                   [position]:
                     playerId === conditions.participants[0] &&
-                    position === conditions.playingPositions[0]
+                    position === conditions.gamePositions[0]
                       ? 1
                       : 0,
                 }),
@@ -105,7 +167,7 @@ export function processExistingRealTimeData(
               goalkeeper: 0,
               out: 0,
               total: 0,
-              playingPosition: conditions.playingPositions.reduce(
+              gamePosition: conditions.gamePositions.reduce(
                 (map, position) => ({
                   ...map,
                   [position]: {
@@ -164,6 +226,8 @@ function getNextParticipant(report: ActivityReport): string {
 }
 
 function updateTurn(report: ActivityReport): void {
+  const lastTurnPlayer = report.data.turn.player;
+
   report.data.turn = {
     player: getNextParticipant(report),
     inPossesion: false,
@@ -173,7 +237,17 @@ function updateTurn(report: ActivityReport): void {
 
   const nextPlayerData = report.data.players[report.data.turn.player];
   nextPlayerData.turns.total += 1;
-  nextPlayerData.turns.playingPosition[nextPlayerData.currentPlayingPosition] += 1;
+  nextPlayerData.turns.gamePosition[nextPlayerData.currentPlayingPosition] += 1;
+
+  // Jugador tiene el turno
+  report.referee.push({
+    type: "turn",
+    timestamp: report.data.elapsedTime,
+    data: {
+      from: lastTurnPlayer,
+      to: report.data.turn.player,
+    },
+  });
 }
 
 export function processRealTimeEvent(event: RealTimeEvent, report: ActivityReport) {
@@ -200,67 +274,129 @@ export function processRealTimeEvent(event: RealTimeEvent, report: ActivityRepor
           event.data.player === report.data.turn.player &&
           report.data.players[report.data.turn.player].locations.length > 0
         ) {
-          const playerData = report.data.players[report.data.turn.player];
+          const playerData = report.data.players[event.data.player];
 
-          playerData.shots.total += 1;
-          playerData.shots.playingPosition[playerData.currentPlayingPosition].total += 1;
-
-          // Pelota dentro de la portería
-          if (event.data.type === "in") {
-            // Registramos gol
-            if (event.data.goal) {
-              playerData.shots.in += 1;
-              playerData.shots.playingPosition[playerData.currentPlayingPosition].in += 1;
-              playerData.shots.streak.current += 1;
-              if (playerData.shots.streak.best < playerData.shots.streak.current) {
-                playerData.shots.streak.best = playerData.shots.streak.current;
-              }
-
-              const hasWon = report.winning.check(report.data.turn.player, report);
-
-              // Comprobamos si ha ganado o hay que actualizar a la nueva posición
-              if (hasWon) {
-                report.winning.player = report.data.turn.player;
-              } else {
-                playerData.currentPlayingPosition =
-                  report.conditions.playingPositions[
-                    report.conditions.playingPositions.findIndex(
-                      (p) => p === playerData.currentPlayingPosition
-                    ) + 1
-                  ];
-              }
-            }
-            // Parada del portero
-            else {
-              playerData.shots.goalkeeper += 1;
-              playerData.shots.playingPosition[playerData.currentPlayingPosition].goalkeeper += 1;
-              playerData.shots.streak.current = 0;
-            }
-          } // Registramos fallo
-          else {
-            playerData.shots.out += 1;
-            playerData.shots.playingPosition[playerData.currentPlayingPosition].out += 1;
-            playerData.shots.streak.current = 0;
-          }
-
-          // Registramos a que posición de la portería fue el lanzamiento
-          if (event.data.type === "in") {
-            playerData.shots.locations.push({ x: event.data.x, y: event.data.y });
-          }
+          const distancia = distanceBetween(
+            playerData.locations[playerData.locations.length - 1],
+            report.conditions.locations.goalPost,
+            report.conditions.scales.field
+          );
 
           // Registramos distancia de lanzamiento
-          playerData.shots.distances.push(
-            distanceBetween(
-              playerData.locations[playerData.locations.length - 1],
-              report.conditions.locations.goalPost,
-              report.conditions.scales.field
-            )
-          );
+          playerData.shots.distances.push(distancia);
+
+          // Lanzamiento invalido desde dentro del area
+          if (
+            report.conditions.minShotDistance != null &&
+            distancia < report.conditions.minShotDistance
+          ) {
+            report.referee.push({
+              type: "foul",
+              timestamp: event.timestamp,
+              data: {
+                type: "area",
+                player: event.data.player,
+                distance: distancia,
+              },
+            });
+          }
+          // Lanzamiento válido desde fuera del area
+          else {
+            // Jugador lanza a portería
+            report.referee.push({
+              type: "shot",
+              timestamp: event.timestamp,
+              data: {
+                type: event.data.type === "in" ? (event.data.goal ? "in" : "goalkeeper") : "out",
+                player: event.data.player,
+                distance: distancia,
+                gamePosition: playerData.currentPlayingPosition,
+              },
+            });
+
+            playerData.shots.total += 1;
+            playerData.shots.gamePosition[playerData.currentPlayingPosition].total += 1;
+
+            // Pelota dentro de la portería
+            if (event.data.type === "in") {
+              // Registramos gol
+              if (event.data.goal) {
+                playerData.shots.in += 1;
+                playerData.shots.gamePosition[playerData.currentPlayingPosition].in += 1;
+                playerData.shots.streak.current += 1;
+                if (playerData.shots.streak.best < playerData.shots.streak.current) {
+                  playerData.shots.streak.best = playerData.shots.streak.current;
+                }
+
+                const hasWon = report.winning.check(report.data.turn.player, report);
+
+                // Comprobamos si ha ganado o hay que actualizar a la nueva posición
+                if (hasWon) {
+                  report.winning.player = report.data.turn.player;
+
+                  // Jugador ha ganado
+                  report.referee.push({
+                    type: "win",
+                    timestamp: event.timestamp,
+                    data: {
+                      player: event.data.player,
+                    },
+                  });
+                } else {
+                  const lastGamePosition = playerData.currentPlayingPosition;
+
+                  playerData.currentPlayingPosition =
+                    report.conditions.gamePositions[
+                      report.conditions.gamePositions.findIndex(
+                        (p) => p === playerData.currentPlayingPosition
+                      ) + 1
+                    ];
+
+                  // Jugador cambia de posición de juego
+                  report.referee.push({
+                    type: "game-position",
+                    timestamp: event.timestamp,
+                    data: {
+                      player: event.data.player,
+                      from: lastGamePosition,
+                      to: playerData.currentPlayingPosition,
+                    },
+                  });
+                }
+              }
+              // Parada del portero
+              else {
+                playerData.shots.goalkeeper += 1;
+                playerData.shots.gamePosition[playerData.currentPlayingPosition].goalkeeper += 1;
+                playerData.shots.streak.current = 0;
+              }
+            } // Registramos fallo
+            else {
+              playerData.shots.out += 1;
+              playerData.shots.gamePosition[playerData.currentPlayingPosition].out += 1;
+              playerData.shots.streak.current = 0;
+            }
+
+            // Registramos a que posición de la portería fue el lanzamiento
+            if (event.data.type === "in") {
+              playerData.shots.locations.push({ x: event.data.x, y: event.data.y });
+            }
+          }
 
           // Pasamos turno si no se termina
           if (!report.winning.player) {
             updateTurn(report);
           }
+        } else {
+          // Jugador lanza sin tener el turno
+          report.referee.push({
+            type: "foul",
+            timestamp: event.timestamp,
+            data: {
+              type: "shot-without-turn",
+              player: event.data.player,
+            },
+          });
         }
       }
       break;
@@ -282,7 +418,7 @@ export function processTimePassing(time: number, report: ActivityReport) {
 
     if (report.data.turn.player === player) {
       playerData.time.total += time;
-      playerData.time.playingPosition[playerData.currentPlayingPosition] += time;
+      playerData.time.gamePosition[playerData.currentPlayingPosition] += time;
     }
   }
 
@@ -292,6 +428,16 @@ export function processTimePassing(time: number, report: ActivityReport) {
 
     // Si el tiempo de turno llega a 0, pasamos turno
     if (report.data.turn.remainingTime < 0) {
+      // Jugador lanza sin tener el turno
+      report.referee.push({
+        type: "foul",
+        timestamp: report.data.elapsedTime,
+        data: {
+          type: "timeout",
+          player: report.data.turn.player,
+        },
+      });
+
       updateTurn(report);
     }
   }

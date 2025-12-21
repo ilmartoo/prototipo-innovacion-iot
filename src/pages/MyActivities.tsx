@@ -34,12 +34,14 @@ export default function MyActivities() {
     return from <= activity.date && to > activity.date;
   }
 
-  const myActivities = activities.filter(
-    (activ) =>
-      isUserInActivity(currentUser.id, activ.id) &&
-      isActivityInSearch(activ) &&
-      activityInDateRange(activ)
-  );
+  const myActivities = activities
+    .filter(
+      (activ) =>
+        isUserInActivity(currentUser.id, activ.id) &&
+        isActivityInSearch(activ) &&
+        activityInDateRange(activ)
+    )
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
 
   function navigateToActivity(activity: Activity): void {
     navigate(`/activity/${activity.id}`);

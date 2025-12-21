@@ -1,4 +1,5 @@
 import type { Position } from "@/data/models/position";
+import type { RefereeEntry } from "./real-time";
 
 export interface Activity {
   id: string;
@@ -13,8 +14,9 @@ export interface Activity {
 
 export interface ActivityConditions {
   participants: string[];
-  playingPositions: string[];
+  gamePositions: string[];
   maxTurnTime?: number;
+  minShotDistance?: number;
   scales: {
     field: Position;
     goalPost: Position;
@@ -34,6 +36,7 @@ export interface ActivityReport {
     player?: string;
     check: (player: string, report: ActivityReport) => boolean;
   };
+  referee: RefereeEntry[];
   data: {
     elapsedTime: number;
     turn: {
@@ -51,18 +54,18 @@ export interface ActivityPlayerData {
   locations: Position[];
   time: {
     total: number;
-    playingPosition: Record<string, number>;
+    gamePosition: Record<string, number>;
   };
   turns: {
     total: number;
-    playingPosition: Record<string, number>;
+    gamePosition: Record<string, number>;
   };
   shots: {
     in: number;
     goalkeeper: number;
     out: number;
     total: number;
-    playingPosition: Record<string, { in: number; goalkeeper: number; out: number; total: number }>;
+    gamePosition: Record<string, { in: number; goalkeeper: number; out: number; total: number }>;
     streak: { current: number; best: number };
     locations: Position[];
     distances: number[];
@@ -75,14 +78,14 @@ export function aggregatePayerData(report: ActivityReport): ActivityPlayerData {
     locations: [],
     time: {
       total: 0,
-      playingPosition: report.conditions.playingPositions.reduce(
+      gamePosition: report.conditions.gamePositions.reduce(
         (map, position) => ({ ...map, [position]: 0 }),
         {}
       ),
     },
     turns: {
       total: 0,
-      playingPosition: report.conditions.playingPositions.reduce(
+      gamePosition: report.conditions.gamePositions.reduce(
         (map, position) => ({
           ...map,
           [position]: 0,
@@ -95,7 +98,7 @@ export function aggregatePayerData(report: ActivityReport): ActivityPlayerData {
       goalkeeper: 0,
       out: 0,
       total: 0,
-      playingPosition: report.conditions.playingPositions.reduce(
+      gamePosition: report.conditions.gamePositions.reduce(
         (map, position) => ({
           ...map,
           [position]: {
@@ -131,21 +134,20 @@ export function aggregatePayerData(report: ActivityReport): ActivityPlayerData {
       playerAgg.shots.streak.best = playerData.shots.streak.best;
     }
 
-    for (const playingPosition of report.conditions.playingPositions) {
-      playerAgg.time.playingPosition[playingPosition] +=
-        playerData.time.playingPosition[playingPosition];
+    for (const playingPosition of report.conditions.gamePositions) {
+      playerAgg.time.gamePosition[playingPosition] += playerData.time.gamePosition[playingPosition];
 
-      playerAgg.turns.playingPosition[playingPosition] +=
-        playerData.turns.playingPosition[playingPosition];
+      playerAgg.turns.gamePosition[playingPosition] +=
+        playerData.turns.gamePosition[playingPosition];
 
-      playerAgg.shots.playingPosition[playingPosition].in +=
-        playerData.shots.playingPosition[playingPosition].in;
-      playerAgg.shots.playingPosition[playingPosition].goalkeeper +=
-        playerData.shots.playingPosition[playingPosition].goalkeeper;
-      playerAgg.shots.playingPosition[playingPosition].out +=
-        playerData.shots.playingPosition[playingPosition].out;
-      playerAgg.shots.playingPosition[playingPosition].total +=
-        playerData.shots.playingPosition[playingPosition].total;
+      playerAgg.shots.gamePosition[playingPosition].in +=
+        playerData.shots.gamePosition[playingPosition].in;
+      playerAgg.shots.gamePosition[playingPosition].goalkeeper +=
+        playerData.shots.gamePosition[playingPosition].goalkeeper;
+      playerAgg.shots.gamePosition[playingPosition].out +=
+        playerData.shots.gamePosition[playingPosition].out;
+      playerAgg.shots.gamePosition[playingPosition].total +=
+        playerData.shots.gamePosition[playingPosition].total;
     }
   });
 

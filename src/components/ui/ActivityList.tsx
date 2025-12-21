@@ -18,7 +18,11 @@ const dateNow = new Date();
 
 export default function ActivityList(props: ActivityListProps) {
   function getDateOffset(date: Date): number {
-    return Math.trunc((date.getTime() - dateNow.getTime()) / 86400000);
+    return (
+      (new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() -
+        new Date(dateNow.getFullYear(), dateNow.getMonth(), dateNow.getDate()).getTime()) /
+      86400000
+    );
   }
 
   function separateActivitiesByDate(activities: Activity[]): Record<string, Activity[]> {
