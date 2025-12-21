@@ -230,9 +230,9 @@ export const activities: Activity[] = [
     ownerId: "U-0003",
     title: "Balonmano y dianas",
     description: "Práctica de puntería en el Pabellón Municipal de Cangas.",
-    date: createDate({ set: { month: 9, day: 9, hour: 18, minutes: 45 } }),
+    date: createDate({ offset: { months: -1, days: -8 }, set: { hour: 18, minutes: 45 } }),
     maxParticipants: 10,
-    started: false,
+    started: true,
     finished: true,
   },
   {
@@ -240,9 +240,9 @@ export const activities: Activity[] = [
     ownerId: "U-0001",
     title: "Vamos a jugar un Reloj",
     description: "Algunas rondas de un divertido Reloj antes de jugar un partido entre amigos.",
-    date: createDate({ set: { month: 9, day: 10, hour: 18, minutes: 0 } }),
+    date: createDate({ offset: { months: -1, days: -7 }, set: { hour: 18, minutes: 0 } }),
     maxParticipants: 16,
-    started: false,
+    started: true,
     finished: true,
   },
   {
@@ -251,9 +251,9 @@ export const activities: Activity[] = [
     title: "Pachanga de balonmano",
     description:
       "Pachanga entre amigos. Buscamos gente que sepa de balonmano para poder realizar cambios y probar cosas nuevas.",
-    date: createDate({ set: { month: 9, day: 10, hour: 20, minutes: 30 } }),
+    date: createDate({ offset: { months: -1, days: -7 }, set: { hour: 20, minutes: 30 } }),
     maxParticipants: 20,
-    started: false,
+    started: true,
     finished: true,
   },
 ];
@@ -291,7 +291,7 @@ export function removeUserFromActivity(userId: string, activityId: string): void
 
 export function secondsToTimeString(seconds: number): string {
   const min = Math.trunc(seconds / 60);
-  const s = Math.round(seconds % 60);
+  const s = Math.trunc(seconds % 60);
   return min > 0 ? `${min}m ${s}s` : `${s}s`;
 }
 
