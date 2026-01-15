@@ -60,7 +60,7 @@ export default function ActivitySummary(props: ActivitySummaryProps) {
             {props.activity.started && !props.activity.finished ? (
               <>
                 <ClockAlertIcon strokeWidth={1.5} className="size-5" />{" "}
-                <span className="font-semibold">En directo</span>
+                <span className="font-semibold">Ahora</span>
               </>
             ) : (
               <>
@@ -82,10 +82,11 @@ export default function ActivitySummary(props: ActivitySummaryProps) {
             {activityParticipants[props.activity.id].length}/{props.activity.maxParticipants}
           </div>
         </ActivityDataRow>
-        <ItemDescription>{props.activity.description}</ItemDescription>
+        <ActivityDataRow>
+          <ItemDescription>{props.activity.description}</ItemDescription>
+          <ItemActions>{icon()}</ItemActions>
+        </ActivityDataRow>
       </ItemContent>
-
-      <ItemActions>{icon()}</ItemActions>
     </Item>
   );
 }
@@ -95,5 +96,5 @@ interface ActivityDataRowProps {
 }
 
 function ActivityDataRow(props: ActivityDataRowProps) {
-  return <div className="flex justify-between">{props.children}</div>;
+  return <div className="flex justify-between gap-1">{props.children}</div>;
 }

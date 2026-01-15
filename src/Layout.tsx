@@ -22,11 +22,11 @@ export default function Layout() {
   }
 
   return (
-    <div className="max-w-110 m-auto relative">
-      <header className="flex items-center h-16 border-b px-0.5 sm:px-1 sticky top-0 bg-background z-10">
+    <div className="max-w-110 m-auto relative overflow-x-hidden">
+      <header className="flex items-center h-16 border-b px-4 sticky top-0 bg-background z-10">
         <NavigationMenu viewport={isMobile} className="max-w-none block">
-          <NavigationMenuList className="w-full justify-start gap-0.5 sm:gap-1">
-            <NavItem {...navAttrs("/")} className="mr-0.5 sm:mr-2">
+          <NavigationMenuList className="w-full justify-start gap-1 sm:gap-1">
+            <NavItem {...navAttrs("/")}>
               <HouseIcon className="size-6 text-base" />
             </NavItem>
             <NavItem {...navAttrs("/my-activities")}>Mis actividades</NavItem>
@@ -42,7 +42,7 @@ export default function Layout() {
           </NavigationMenuList>
         </NavigationMenu>
       </header>
-      <main className="p-6 flex flex-col gap-4">
+      <main className="p-4 flex flex-col gap-4">
         <Outlet />
       </main>
       <Toaster />
@@ -65,7 +65,7 @@ function ImagenPerfil(props: ImagenPerfilProps) {
       <Button asChild variant="ghost" className="flex flex-row gap-2 h-fit items-center px-1 py-1">
         <NavigationMenuLink href={props.to}>
           <UserAvatar className="grow" userId={props.userId} />
-          <div className="flex flex-col">
+          <div className="hidden xs:flex flex-col">
             <h2 className="font-semibold">{props.nombre}</h2>
             <h3 className="text-xs">Nivel {props.nivel}</h3>
           </div>
@@ -85,7 +85,11 @@ interface NavItemProps {
 function NavItem(props: NavItemProps) {
   return (
     <NavigationMenuItem className={props.className}>
-      <Button asChild variant={props.accent ? "secondary" : "ghost"} className="px-1 sm:px-2 text-sm sm:text-base h-9 sm:h-10">
+      <Button
+        asChild
+        variant={props.accent ? "secondary" : "ghost"}
+        className="px-2! text-sm sm:text-base h-9 sm:h-10"
+      >
         <NavigationMenuLink href={props.to}>{props.children}</NavigationMenuLink>
       </Button>
     </NavigationMenuItem>

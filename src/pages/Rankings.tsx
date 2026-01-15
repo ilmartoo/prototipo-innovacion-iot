@@ -1,6 +1,7 @@
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import RankingTable from "@/components/ui/RankingTable";
 import TopBar from "@/components/ui/TopBar";
+import { getUserById } from "@/data/app-data";
 import { calculateRanking, type ActivityRankingPending } from "@/data/models/activity-ranking";
 import { SearchIcon } from "lucide-react";
 import { useState } from "react";
@@ -29,16 +30,27 @@ export default function Rankings() {
     { userId: "U-0005", points: 178, payload: null },
   ];
 
-  const showAmigos = titleAmigos.toLowerCase().includes(search.toLowerCase());
-  const showGlobal = titleGlobal.toLowerCase().includes(search.toLowerCase());
+  function hasParticipant(ranking: ActivityRankingPending[], search: string) {
+    return ranking.some((r) => {
+      const user = getUserById(r.userId);
+      return `${user.name} ${user.surname}`.toLowerCase().includes(search.toLowerCase());
+    });
+  }
+
+  const showAmigos =
+    titleAmigos.toLowerCase().includes(search.toLowerCase()) ||
+    hasParticipant(rankingsAmigos, search);
+  const showGlobal =
+    titleGlobal.toLowerCase().includes(search.toLowerCase()) ||
+    hasParticipant(rankingsGlobal, search);
 
   const noResults = !showAmigos && !showGlobal;
 
   return (
-    <div className="min-h-screen pb-20">
+    <>
       <TopBar title="Rankings" to="/" />
 
-      <div className="p-4 space-y-6">
+      <div className="space-y-6">
         {/* Buscador */}
         <InputGroup className="bg-white shadow-sm rounded-lg mb-6">
           <InputGroupInput
@@ -62,7 +74,7 @@ export default function Rankings() {
               layout="simple"
               labels={{
                 subject: "Amigo",
-                value: "Número de actividades",
+                value: "Núm. actividades",
               }}
             />
           </div>
@@ -87,6 +99,6 @@ export default function Rankings() {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
