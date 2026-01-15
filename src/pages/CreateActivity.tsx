@@ -29,6 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchemaBase = z.object({
@@ -74,6 +75,9 @@ export default function CreateActivity() {
   const [isStartNow, setStartNow] = useState(startNow);
 
   function onSubmit() {
+    toast.success("¡Actividad creada correctamente!", {
+      description: "Tu actividad ha sido registrada exitosamente."
+    });
     navigate(`/activity/${defaultActivity.id}`);
   }
 

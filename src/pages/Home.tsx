@@ -6,6 +6,7 @@ import {
   activityParticipants,
   addUserToActivity,
   currentUser,
+  getUserById,
   isUserInActivity,
   removeUserFromActivity,
 } from "@/data/app-data";
@@ -13,6 +14,7 @@ import type { Activity } from "@/data/models/activity";
 import { SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 
 const dateNow = new Date();
 
@@ -22,10 +24,22 @@ export default function Home() {
   const [search, setSearch] = useState<string>("");
 
   function isActivityInSearch(activity: Activity): boolean {
-    return (
-      activity.title.toLowerCase().includes(search) ||
-      activity.description.toLowerCase().includes(search)
-    );
+    const searchLower = search.toLowerCase();
+    
+    // Buscar título y descripción de la actividad
+    const titleMatch = activity.title.toLowerCase().includes(searchLower);
+    const descriptionMatch = activity.description.toLowerCase().includes(searchLower);
+    
+    // Buscar nombres de participantes
+    const participantNames = activityParticipants[activity.id]
+      ?.map(participantId => {
+        const user = getUserById(participantId);
+        return user ? `${user.name} ${user.surname}`.toLowerCase() : '';
+      })
+      .filter(name => name !== '') || [];
+    
+    const participantMatch = participantNames.some(name => name.includes(searchLower));
+    return titleMatch || descriptionMatch || participantMatch;
   }
 
   const pendingUserActivities: Activity[] = [];
@@ -51,12 +65,37 @@ export default function Home() {
   }
 
   function toggleCurrentUserOnActivity(activity: Activity): void {
-    if (isUserInActivity(currentUser.id, activity.id)) {
+    const wasInActivity = isUserInActivity(currentUser.id, activity.id);
+    
+    if (wasInActivity) {
       removeUserFromActivity(currentUser.id, activity.id);
       setAllActivities([...allActivities]);
+      
+      toast.success(`Te has retirado de "${activity.title}"`, {
+        action: {
+          label: "Deshacer",
+          onClick: () => {
+            addUserToActivity(currentUser.id, activity.id);
+            setAllActivities([...allActivities]);
+            toast.success(`Te has unido nuevamente a "${activity.title}"`);
+          },
+        },
+      });
+      
     } else {
       addUserToActivity(currentUser.id, activity.id);
       setAllActivities([...allActivities]);
+      
+      toast.success(`Te has unido a "${activity.title}"`, {
+        action: {
+          label: "Deshacer",
+          onClick: () => {
+            removeUserFromActivity(currentUser.id, activity.id);
+            setAllActivities([...allActivities]);
+            toast.success(`Te has retirado de "${activity.title}"`);
+          },
+        },
+      });
     }
   }
 

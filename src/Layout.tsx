@@ -5,6 +5,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { Toaster } from "@/components/ui/sonner";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { currentUser } from "@/data/app-data";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -44,6 +45,7 @@ export default function Layout() {
       <main className="p-6 flex flex-col gap-4">
         <Outlet />
       </main>
+      <Toaster />
     </div>
   );
 }
