@@ -23,10 +23,10 @@ export default function Layout() {
 
   return (
     <div className="max-w-110 m-auto relative">
-      <header className="flex items-center h-16 border-b px-2 sticky top-0 bg-background z-10">
+      <header className="flex items-center h-16 border-b px-0.5 sm:px-1 sticky top-0 bg-background z-10">
         <NavigationMenu viewport={isMobile} className="max-w-none block">
-          <NavigationMenuList className="w-full justify-start">
-            <NavItem {...navAttrs("/")} className="mr-4">
+          <NavigationMenuList className="w-full justify-start gap-0.5 sm:gap-1">
+            <NavItem {...navAttrs("/")} className="mr-0.5 sm:mr-2">
               <HouseIcon className="size-6 text-base" />
             </NavItem>
             <NavItem {...navAttrs("/my-activities")}>Mis actividades</NavItem>
@@ -62,7 +62,7 @@ interface ImagenPerfilProps {
 function ImagenPerfil(props: ImagenPerfilProps) {
   return (
     <NavigationMenuItem className={props.className}>
-      <Button asChild variant="ghost" className="flex flex-row gap-2 h-fit items-center px-2 py-1">
+      <Button asChild variant="ghost" className="flex flex-row gap-2 h-fit items-center px-1 py-1">
         <NavigationMenuLink href={props.to}>
           <UserAvatar className="grow" userId={props.userId} />
           <div className="flex flex-col">
@@ -85,7 +85,7 @@ interface NavItemProps {
 function NavItem(props: NavItemProps) {
   return (
     <NavigationMenuItem className={props.className}>
-      <Button asChild variant={props.accent ? "secondary" : "ghost"}>
+      <Button asChild variant={props.accent ? "secondary" : "ghost"} className="px-1 sm:px-2 text-sm sm:text-base h-9 sm:h-10">
         <NavigationMenuLink href={props.to}>{props.children}</NavigationMenuLink>
       </Button>
     </NavigationMenuItem>
